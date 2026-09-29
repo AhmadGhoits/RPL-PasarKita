@@ -29,6 +29,7 @@
     small,.muted { color:var(--muted) }
     header { background:white; border-bottom:1px solid var(--line) }
     .topbar { max-width:1260px; margin:auto; padding:18px 28px; display:flex; align-items:center; justify-content:space-between; gap:12px }
+    .topbar-right { display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:flex-end }
     .brand { display:flex; gap:10px; align-items:center; font-weight:800; font-size:22px; letter-spacing:-.7px }
     .logo { background:var(--green); color:var(--lime); width:42px; height:42px; border-radius:14px; display:grid; place-items:center }
     .pill { display:inline-flex; padding:5px 10px; border-radius:20px; background:#edf5e8; font-size:12px; color:var(--green) }
@@ -85,6 +86,13 @@
     .merchant button { margin-top:12px; width:100% }
     .section-gap { margin-top:22px }
     .notice { padding:12px 15px; border-radius:12px; background:#fff4db; color:#81601e; font-size:13px; margin-bottom:16px }
+    .auth-wrap { max-width:980px; margin:24px auto; padding:0 20px 20px }
+    .auth-grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:16px }
+    .security-note { font-size:13px; color:#81601e; background:#fff4db; border:1px solid #ffe6b8; border-radius:12px; padding:12px 14px; margin-top:14px }
+    .identity { font-size:13px; color:var(--muted) }
+    .badge-role { display:inline-flex; align-items:center; border-radius:20px; padding:5px 10px; background:#edf5e8; color:var(--green); font-size:12px; font-weight:700; text-transform:capitalize }
+    .access-card { max-width:600px; margin:40px auto; text-align:center }
+    .status { margin-top:8px; color:var(--muted); font-size:12px }
     dialog { border:0; border-radius:20px; padding:25px; width:min(460px,calc(100% - 28px)); max-height:90vh; color:var(--dark); box-shadow:0 20px 80px #14352530 }
     dialog::backdrop { background:#132c2455 }
     label { display:block; margin:15px 0; font-size:13px; font-weight:600 }
@@ -100,6 +108,7 @@
       .split { grid-template-columns:minmax(0,1fr) 280px }
     }
     @media(max-width:850px) {
+      .auth-grid { grid-template-columns:1fr }
       .layout { display:block }
       aside { padding:10px 20px; border-right:0; border-bottom:1px solid var(--line) }
       .nav { display:flex; overflow:auto }
@@ -109,6 +118,7 @@
     }
     @media(max-width:600px) {
       .topbar { padding:14px 16px }
+      .topbar-right { gap:6px }
       .brand { font-size:20px }
       main { padding:20px 15px }
       aside { padding:8px }
@@ -136,15 +146,73 @@
 <header>
   <div class="topbar">
     <div class="brand"><span class="logo" aria-hidden="true">▦</span>PasarKita<span class="pill">UMKM</span></div>
-    <span id="connection" class="pill" role="status"></span>
+    <div class="topbar-right">
+      <span id="identity" class="identity" hidden></span>
+      <span id="role-badge" class="badge-role" hidden></span>
+      <button id="logout" class="secondary" hidden>Logout</button>
+      <span id="connection" class="pill" role="status"></span>
+    </div>
   </div>
 </header>
 
-<div class="layout">
+<section id="auth-screen" class="auth-wrap" hidden>
+  <div class="panel">
+    <div class="page-head">
+      <div>
+        <p class="eyebrow">AKSES PASARKITA</p>
+        <h1>Login & Sign Up</h1>
+        <p class="muted">Masuk untuk mengakses fitur sesuai peran Admin atau Konsumer.</p>
+      </div>
+    </div>
+    <div class="auth-grid">
+      <form id="login-form" class="panel" aria-label="Form login">
+        <h2>Login</h2>
+        <label>Email atau Username
+          <input name="login" autocomplete="username" required placeholder="contoh: admin@pasarkita.local">
+        </label>
+        <label>Password
+          <input name="password" type="password" autocomplete="current-password" required minlength="8">
+        </label>
+        <button type="submit" class="full">Masuk</button>
+        <p class="status" id="login-status" aria-live="polite">Gunakan akun sendiri atau akun demo.</p>
+      </form>
+      <form id="signup-form" class="panel" aria-label="Form signup">
+        <h2>Sign Up</h2>
+        <label>Nama lengkap
+          <input name="name" autocomplete="name" required maxlength="70" placeholder="Nama Anda">
+        </label>
+        <label>Email atau Username
+          <input name="login" autocomplete="username" required maxlength="80" placeholder="email@contoh.com atau username">
+        </label>
+        <label>Password
+          <input name="password" type="password" autocomplete="new-password" required minlength="8">
+        </label>
+        <label>Konfirmasi Password
+          <input name="confirmPassword" type="password" autocomplete="new-password" required minlength="8">
+        </label>
+        <label>Role
+          <select name="role" required>
+            <option value="admin">Admin</option>
+            <option value="konsumer">Konsumer</option>
+          </select>
+        </label>
+        <button type="submit" class="full">Daftar</button>
+        <p class="status" id="signup-status" aria-live="polite">Akun disimpan lokal di browser ini.</p>
+      </form>
+    </div>
+    <div class="security-note">
+      Catatan keamanan: autentikasi ini hanya untuk prototipe lokal (browser/localStorage), bukan untuk produksi.
+      <br>Akun demo: Admin <strong>admin@pasarkita.local / Admin123!</strong> · Konsumer <strong>konsumer@pasarkita.local / Konsumer123!</strong>
+    </div>
+  </div>
+</section>
+
+<div class="layout" id="app-shell" hidden>
   <aside>
     <nav class="nav" aria-label="Menu utama">
       <button data-page="kasir" class="active">▦ Kasir</button>
       <button data-page="stok">▤ Produk & Stok</button>
+      <button data-page="riwayat" hidden>🧾 Riwayat Pembelian</button>
       <button data-page="pasar">⌖ Titik Titip</button>
       <button data-page="keuangan">↗ Keuangan</button>
     </nav>
@@ -262,6 +330,25 @@
         <div id="trend-list" class="trend-list"></div>
       </div>
     </section>
+    <section id="page-riwayat" hidden>
+      <div class="page-head">
+        <div><p class="eyebrow">RIWAYAT KONSUMER</p><h1>Pembelian Saya</h1><p class="muted">Menampilkan pesanan akun yang sedang login.</p></div>
+      </div>
+      <div class="panel">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>ID Pesanan</th><th>Waktu</th><th>Rincian</th><th>Status</th><th>Total</th></tr></thead>
+            <tbody id="consumer-history"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+    <section id="page-access" hidden>
+      <div class="panel access-card">
+        <h2>Akses ditolak</h2>
+        <p class="muted" id="access-message">Fitur ini tidak tersedia untuk peran Anda.</p>
+      </div>
+    </section>
 
 <footer>PasarKita · Prototipe lokal · Data dapat hilang jika data situs/browser dihapus. Unduh backup secara berkala.</footer>
   </main>
@@ -285,44 +372,59 @@
 
 const $ = selector => document.querySelector(selector);
 const money = value => new Intl.NumberFormat('id-ID', {
-  style:'currency', currency:'IDR', maximumFractionDigits:0
+  style: 'currency', currency: 'IDR', maximumFractionDigits: 0
 }).format(value);
 const esc = value => String(value).replace(/[&<>"']/g, char => ({
-  '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+  '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
 })[char]);
 const KEY = 'pasarkita-v1';
 const uid = () => crypto.randomUUID
   ? crypto.randomUUID()
   : Date.now().toString(36) + Math.random().toString(36).slice(2);
-const units = ['kg','liter','pcs','ikat','bungkus'];
+const units = ['kg', 'liter', 'pcs', 'ikat', 'bungkus'];
+const roles = ['admin', 'konsumer'];
+
+const DEMO_ACCOUNTS = [
+  { name: 'Admin Demo', login: 'admin@pasarkita.local', role: 'admin', password: 'Admin123!' },
+  { name: 'Konsumer Demo', login: 'konsumer@pasarkita.local', role: 'konsumer', password: 'Konsumer123!' }
+];
 
 const initialData = () => ({
   products: [
-    {id:'p1',name:'Beras premium',price:15000,stock:24,unit:'kg',icon:'🌾'},
-    {id:'p2',name:'Telur ayam',price:28000,stock:12,unit:'kg',icon:'🥚'},
-    {id:'p3',name:'Tomat segar',price:12000,stock:8,unit:'kg',icon:'🍅'},
-    {id:'p4',name:'Minyak goreng',price:18000,stock:16,unit:'liter',icon:'🫙'},
-    {id:'p5',name:'Bayam hijau',price:4000,stock:5,unit:'ikat',icon:'🥬'},
-    {id:'p6',name:'Cabai merah',price:45000,stock:4,unit:'kg',icon:'🌶️'}
+    { id: 'p1', name: 'Beras premium', price: 15000, stock: 24, unit: 'kg', icon: '🌾' },
+    { id: 'p2', name: 'Telur ayam', price: 28000, stock: 12, unit: 'kg', icon: '🥚' },
+    { id: 'p3', name: 'Tomat segar', price: 12000, stock: 8, unit: 'kg', icon: '🍅' },
+    { id: 'p4', name: 'Minyak goreng', price: 18000, stock: 16, unit: 'liter', icon: '🫙' },
+    { id: 'p5', name: 'Bayam hijau', price: 4000, stock: 5, unit: 'ikat', icon: '🥬' },
+    { id: 'p6', name: 'Cabai merah', price: 45000, stock: 4, unit: 'kg', icon: '🌶️' }
   ],
-  sales:[], expenses:[], orders:[]
+  sales: [], expenses: [], orders: [], purchaseOrders: [], users: [], currentSession: null
 });
 
 const merchants = [
-  {id:'m1',name:'Lapak Sayur Bu Sari',type:'Sayuran segar',icon:'🥬',
-   lat:-7.7972,lng:110.3658,pickup:'Titik Titip A (contoh)',
-   goods:[{name:'Paket sayur harian',price:15000},{name:'Bayam / ikat',price:4000}]},
-  {id:'m2',name:'Sembako Pak Budi',type:'Kebutuhan dapur',icon:'🌾',
-   lat:-7.8008,lng:110.3692,pickup:'Titik Titip B (contoh)',
-   goods:[{name:'Beras / kg',price:15000},{name:'Minyak / liter',price:18000}]},
-  {id:'m3',name:'Telur Mbak Rina',type:'Telur & bahan pokok',icon:'🥚',
-   lat:-7.7958,lng:110.3725,pickup:'Titik Titip C (contoh)',
-   goods:[{name:'Telur ayam / kg',price:28000},{name:'Gula pasir / kg',price:17000}]}
+  {
+    id: 'm1', name: 'Lapak Sayur Bu Sari', type: 'Sayuran segar', icon: '🥬',
+    lat: -7.7972, lng: 110.3658, pickup: 'Titik Titip A (contoh)',
+    goods: [{ name: 'Paket sayur harian', price: 15000 }, { name: 'Bayam / ikat', price: 4000 }]
+  },
+  {
+    id: 'm2', name: 'Sembako Pak Budi', type: 'Kebutuhan dapur', icon: '🌾',
+    lat: -7.8008, lng: 110.3692, pickup: 'Titik Titip B (contoh)',
+    goods: [{ name: 'Beras / kg', price: 15000 }, { name: 'Minyak / liter', price: 18000 }]
+  },
+  {
+    id: 'm3', name: 'Telur Mbak Rina', type: 'Telur & bahan pokok', icon: '🥚',
+    lat: -7.7958, lng: 110.3725, pickup: 'Titik Titip C (contoh)',
+    goods: [{ name: 'Telur ayam / kg', price: 28000 }, { name: 'Gula pasir / kg', price: 17000 }]
+  }
 ];
 
 let db, cart = {}, editAction;
 let map, mapLoading = false;
 const markers = {};
+let currentUser = null;
+let activePage = 'kasir';
+let cartOwnerId = null;
 
 function toast(message) {
   $('#toast').textContent = message;
@@ -331,12 +433,138 @@ function toast(message) {
   toast.timer = setTimeout(() => $('#toast').hidden = true, 4200);
 }
 
+function fallbackHash(input) {
+  let hash = 5381;
+  for (const char of input) {
+    hash = ((hash << 5) + hash) + char.charCodeAt(0);
+    hash |= 0;
+  }
+  return `fallback:${Math.abs(hash).toString(16)}`;
+}
+
+async function hashPassword(password) {
+  const plain = String(password || '');
+  if (crypto?.subtle && typeof TextEncoder !== 'undefined') {
+    const bytes = new TextEncoder().encode(plain);
+    const digest = await crypto.subtle.digest('SHA-256', bytes);
+    const hash = Array.from(new Uint8Array(digest)).map(x => x.toString(16).padStart(2, '0')).join('');
+    return `sha256:${hash}`;
+  }
+  return fallbackHash(plain);
+}
+
+async function verifyPassword(password, storedHash) {
+  const stored = String(storedHash || '');
+  if (!stored) return false;
+  if (stored.startsWith('sha256:') || stored.startsWith('fallback:')) {
+    return (await hashPassword(password)) === stored;
+  }
+  return password === stored;
+}
+
+function normalizeRole(value) {
+  const raw = String(value || '').toLowerCase();
+  if (raw === 'admin') return 'admin';
+  if (raw === 'konsumer' || raw === 'consumer') return 'konsumer';
+  return null;
+}
+
+function normalizeLogin(value) {
+  const login = String(value || '').trim();
+  const emailOK = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(login);
+  const userOK = /^[a-zA-Z0-9._-]{3,30}$/.test(login);
+  if (!emailOK && !userOK) {
+    throw new Error('Gunakan email valid atau username 3-30 karakter (huruf, angka, titik, underscore, strip).');
+  }
+  return login.toLowerCase();
+}
+
+async function normalizeUser(user) {
+  if (!user || typeof user !== 'object') return null;
+  const role = normalizeRole(user.role);
+  if (!role) return null;
+  const loginNorm = normalizeLogin(user.login || user.username || user.email || '');
+  const name = text(user.name || user.fullName || loginNorm);
+  let passwordHash = String(user.passwordHash || '').trim();
+  if (!passwordHash && user.password) passwordHash = await hashPassword(String(user.password));
+  if (!passwordHash) return null;
+  return {
+    id: String(user.id || uid()).trim() || uid(),
+    name,
+    login: String(user.login || user.username || user.email || loginNorm).trim() || loginNorm,
+    loginNorm,
+    passwordHash,
+    role,
+    createdAt: safeDate(user.createdAt)
+  };
+}
+
+async function ensureDemoUsers(users) {
+  const existing = [...users];
+  const logins = new Set(existing.map(user => user.loginNorm));
+  for (const demo of DEMO_ACCOUNTS) {
+    const loginNorm = normalizeLogin(demo.login);
+    if (logins.has(loginNorm)) continue;
+    existing.push({
+      id: uid(),
+      name: demo.name,
+      login: demo.login,
+      loginNorm,
+      passwordHash: await hashPassword(demo.password),
+      role: demo.role,
+      createdAt: new Date().toISOString()
+    });
+    logins.add(loginNorm);
+  }
+  return existing;
+}
+
+function syncCurrentUser() {
+  const userId = db?.currentSession?.userId;
+  currentUser = userId ? db.users.find(user => user.id === userId) || null : null;
+  if (!currentUser && db?.currentSession) {
+    db.currentSession = null;
+    localStorage.setItem(KEY, JSON.stringify(db));
+  }
+}
+
+function canAccessPage(role, page) {
+  if (role === 'admin') return ['kasir', 'stok', 'pasar', 'keuangan'].includes(page);
+  if (role === 'konsumer') return ['kasir', 'riwayat', 'pasar'].includes(page);
+  return false;
+}
+
+function isAdmin() {
+  return currentUser?.role === 'admin';
+}
+
+function isKonsumer() {
+  return currentUser?.role === 'konsumer';
+}
+
+function requireAuth() {
+  if (currentUser) return true;
+  toast('Silakan login terlebih dahulu.');
+  showAuthScreen();
+  return false;
+}
+
+function requireRole(allowedRoles, message) {
+  if (!requireAuth()) return false;
+  const allowed = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles];
+  if (allowed.includes(currentUser.role)) return true;
+  toast(message || 'Akses ditolak untuk peran Anda.');
+  showAccessDenied(message || 'Fitur ini tidak tersedia untuk peran Anda.');
+  return false;
+}
+
 function commit(change) {
   try {
     const next = JSON.parse(JSON.stringify(db));
     change(next);
     localStorage.setItem(KEY, JSON.stringify(next));
     db = next;
+    syncCurrentUser();
     return true;
   } catch (error) {
     toast('Gagal menyimpan: ' + error.message);
@@ -352,7 +580,7 @@ function normalizeProduct(product) {
     id: text(product?.id || uid()),
     name: text(product?.name),
     price: integer(product?.price),
-    stock: integer(product?.stock,0),
+    stock: integer(product?.stock, 0),
     unit,
     icon
   };
@@ -373,19 +601,8 @@ function looseInteger(value, fallback = 0, min = 0, max = 1000000000) {
   return i;
 }
 
-function normalizeDb(data) {
-  if (!data || typeof data !== 'object') throw new Error('File backup tidak valid.');
-  if (!Array.isArray(data.products) || !Array.isArray(data.sales) || !Array.isArray(data.expenses) || !Array.isArray(data.orders)) {
-    throw new Error('Struktur backup tidak dikenali.');
-  }
-  const products = data.products.map(product => {
-    try {
-      return normalizeProduct(product);
-    } catch {
-      return null;
-    }
-  }).filter(Boolean);
-  const sales = data.sales.filter(x => x && typeof x === 'object').map(sale => {
+function normalizeSales(data) {
+  return data.filter(x => x && typeof x === 'object').map(sale => {
     const items = Array.isArray(sale.items) ? sale.items.map(item => {
       if (!item || typeof item !== 'object') return null;
       const name = String(item.name || '').trim();
@@ -409,65 +626,210 @@ function normalizeDb(data) {
       items,
       total,
       cash,
-      change: Math.max(looseInteger(sale.change, cash - total, 0), cash - total)
+      change: Math.max(looseInteger(sale.change, cash - total, 0), cash - total),
+      source: String(sale.source || 'admin').trim() || 'admin',
+      consumerId: sale.consumerId ? String(sale.consumerId) : null,
+      paymentMethod: sale.paymentMethod ? String(sale.paymentMethod) : 'Tunai'
     };
   });
-  const expenses = data.expenses.filter(x => x && typeof x === 'object').map(expense => ({
+}
+
+function normalizeExpenses(data) {
+  return data.filter(x => x && typeof x === 'object').map(expense => ({
     id: String(expense.id || uid()).trim() || uid(),
     date: safeDate(expense.date),
     note: String(expense.note || expense.label || 'Pengeluaran').trim() || 'Pengeluaran',
     amount: looseInteger(expense.amount, 0, 0)
   }));
-  const orders = data.orders.filter(x => x && typeof x === 'object').map(order => ({
+}
+
+function normalizeMarketOrders(data) {
+  return data.filter(x => x && typeof x === 'object').map(order => ({
     id: String(order.id || uid()).trim() || uid(),
     date: safeDate(order.date),
     merchant: String(order.merchant || 'Pedagang contoh').trim() || 'Pedagang contoh',
     good: String(order.good || 'Paket barang').trim() || 'Paket barang',
     qty: looseInteger(order.qty, 1, 1),
     total: looseInteger(order.total, 0, 0),
-    pickup: String(order.pickup || 'Titik titip').trim() || 'Titik titip'
+    pickup: String(order.pickup || 'Titik titip').trim() || 'Titik titip',
+    consumerId: order.consumerId ? String(order.consumerId) : null
   }));
+}
+
+function normalizePurchaseOrders(data) {
+  return data.filter(x => x && typeof x === 'object').map(order => {
+    const items = Array.isArray(order.items) ? order.items.map(item => {
+      if (!item || typeof item !== 'object') return null;
+      const name = String(item.name || '').trim();
+      if (!name) return null;
+      return {
+        id: String(item.id || uid()).trim() || uid(),
+        name,
+        price: looseInteger(item.price, 0, 0),
+        qty: looseInteger(item.qty, 1, 1),
+        unit: units.includes(String(item.unit || 'pcs').trim()) ? String(item.unit).trim() : 'pcs'
+      };
+    }).filter(Boolean) : [];
+    const total = looseInteger(order.total, items.reduce((sum, item) => sum + item.price * item.qty, 0), 0);
+    return {
+      id: String(order.id || uid()).trim() || uid(),
+      orderNo: String(order.orderNo || ('ORD-' + String(order.id || uid()).slice(-8).toUpperCase())).trim(),
+      date: safeDate(order.date),
+      consumerId: String(order.consumerId || '').trim() || null,
+      buyerName: String(order.buyerName || 'Pembeli').trim() || 'Pembeli',
+      paymentMethod: String(order.paymentMethod || 'Transfer (simulasi)').trim() || 'Transfer (simulasi)',
+      status: String(order.status || 'Berhasil (simulasi)').trim() || 'Berhasil (simulasi)',
+      items,
+      total
+    };
+  });
+}
+
+async function normalizeDb(data) {
+  if (!data || typeof data !== 'object') throw new Error('File backup tidak valid.');
+  const base = initialData();
+  const products = Array.isArray(data.products) ? data.products.map(product => {
+    try {
+      return normalizeProduct(product);
+    } catch {
+      return null;
+    }
+  }).filter(Boolean) : [];
+
+  const usersRaw = Array.isArray(data.users)
+    ? data.users
+    : (Array.isArray(data.accounts) ? data.accounts : []);
+  const userResults = await Promise.all(usersRaw.map(normalizeUser));
+  const usersUnique = [];
+  const seen = new Set();
+  for (const user of userResults.filter(Boolean)) {
+    if (seen.has(user.loginNorm)) continue;
+    usersUnique.push(user);
+    seen.add(user.loginNorm);
+  }
+  const users = await ensureDemoUsers(usersUnique);
+
+  const sales = normalizeSales(Array.isArray(data.sales) ? data.sales : []);
+  const expenses = normalizeExpenses(Array.isArray(data.expenses) ? data.expenses : []);
+  const orders = normalizeMarketOrders(Array.isArray(data.orders) ? data.orders : []);
+  const purchaseOrders = normalizePurchaseOrders(Array.isArray(data.purchaseOrders) ? data.purchaseOrders : []);
+
+  const sessionUserId = String(data.currentSession?.userId || '').trim();
+  const validSession = users.find(user => user.id === sessionUserId) ? {
+    userId: sessionUserId,
+    loginAt: safeDate(data.currentSession?.loginAt)
+  } : null;
+
   return {
-    products: products.length ? products : initialData().products,
+    products: products.length ? products : base.products,
     sales,
     expenses,
-    orders
+    orders,
+    purchaseOrders,
+    users,
+    currentSession: validSession
   };
 }
 
-function boot() {
-  let recovered = false;
-  try {
-    const raw = localStorage.getItem(KEY);
-    db = raw ? normalizeDb(JSON.parse(raw)) : initialData();
-    localStorage.setItem(KEY, JSON.stringify(db));
-  } catch {
-    recovered = true;
-    try {
-      db = initialData();
-      localStorage.setItem(KEY, JSON.stringify(db));
-    } catch {
-      $('main').innerHTML = '<div class="notice">Penyimpanan lokal tidak tersedia atau data aplikasi rusak. Coba browser normal dengan penyimpanan situs aktif.</div>';
-      return;
-    }
-  }
-  render();
-  bindEvents();
-  updateConnection();
-  if (recovered) toast('Data lama tidak valid, aplikasi memulai data demo baru.');
-}
 function cartLines() {
-  return Object.entries(cart).map(([id,qty]) => {
+  return Object.entries(cart).map(([id, qty]) => {
     const product = db.products.find(p => p.id === id);
-    return product ? {...product,qty} : null;
+    return product ? { ...product, qty } : null;
   }).filter(Boolean);
 }
+
 function cartTotal() {
-  return cartLines().reduce((sum,p) => sum + p.price*p.qty,0);
+  return cartLines().reduce((sum, p) => sum + p.price * p.qty, 0);
 }
-function stat(label,value,note) {
+
+function stat(label, value, note) {
   return `<div class="stat"><small>${esc(label)}</small><strong>${esc(value)}</strong><small>${esc(note)}</small></div>`;
 }
+
+function showAuthScreen() {
+  $('#auth-screen').hidden = false;
+  $('#app-shell').hidden = true;
+  $('#logout').hidden = true;
+  $('#identity').hidden = true;
+  $('#role-badge').hidden = true;
+}
+
+function ensureCartOwner() {
+  if (!currentUser) {
+    cart = {};
+    cartOwnerId = null;
+    return;
+  }
+  if (cartOwnerId !== currentUser.id) {
+    cart = {};
+    cartOwnerId = currentUser.id;
+    $('#cash').value = '';
+  }
+}
+
+function renderTopbar() {
+  if (!currentUser) {
+    showAuthScreen();
+    return;
+  }
+  $('#auth-screen').hidden = true;
+  $('#app-shell').hidden = false;
+  $('#logout').hidden = false;
+  $('#identity').hidden = false;
+  $('#role-badge').hidden = false;
+  $('#identity').textContent = `${currentUser.name} (${currentUser.login})`;
+  $('#role-badge').textContent = currentUser.role;
+}
+
+function showAccessDenied(message) {
+  $('#access-message').textContent = message || 'Fitur ini tidak tersedia untuk peran Anda.';
+  document.querySelectorAll('main > section').forEach(s => s.hidden = true);
+  $('#page-access').hidden = false;
+  document.querySelectorAll('[data-page]').forEach(button => {
+    button.classList.remove('active');
+    button.removeAttribute('aria-current');
+  });
+}
+
+function setPage(page, accessMessage) {
+  if (!requireAuth()) return;
+  if (!canAccessPage(currentUser.role, page)) {
+    showAccessDenied(accessMessage || 'Akses ditolak untuk halaman tersebut.');
+    return;
+  }
+  activePage = page;
+  document.querySelectorAll('main > section').forEach(section => section.hidden = true);
+  const target = $('#page-' + page);
+  if (target) target.hidden = false;
+  document.querySelectorAll('[data-page]').forEach(button => {
+    const active = button.dataset.page === page;
+    button.classList.toggle('active', active);
+    if (active) button.setAttribute('aria-current', 'page');
+    else button.removeAttribute('aria-current');
+  });
+  if (page === 'pasar') initMap();
+}
+
+function renderNavigation() {
+  const btnKasir = document.querySelector('[data-page="kasir"]');
+  const btnStok = document.querySelector('[data-page="stok"]');
+  const btnKeuangan = document.querySelector('[data-page="keuangan"]');
+  const btnRiwayat = document.querySelector('[data-page="riwayat"]');
+  if (!currentUser) return;
+
+  if (isAdmin()) {
+    btnKasir.textContent = '▦ Dashboard / Kasir';
+    btnStok.hidden = false;
+    btnKeuangan.hidden = false;
+    btnRiwayat.hidden = true;
+  } else {
+    btnKasir.textContent = '🏠 Beranda / Katalog';
+    btnStok.hidden = true;
+    btnKeuangan.hidden = true;
+    btnRiwayat.hidden = false;
+  }
+}
+
 function renderProducts() {
   const query = $('#search').value.toLocaleLowerCase('id-ID').trim();
   const products = db.products.filter(p => p.name.toLocaleLowerCase('id-ID').includes(query));
@@ -476,40 +838,39 @@ function renderProducts() {
       <div class="product-art" aria-hidden="true">${esc(p.icon)}</div>
       <h3>${esc(p.name)}</h3>
       <div class="price">${money(p.price)} <small>/ ${esc(p.unit)}</small></div>
-      <small class="${p.stock<=5?'low':''}">Stok ${p.stock} ${esc(p.unit)}</small>
-      <button class="secondary" data-add="${esc(p.id)}" ${p.stock<=(cart[p.id]||0)?'disabled':''}>
-        ${p.stock===0?'Stok habis':'+ Keranjang'}
+      <small class="${p.stock <= 5 ? 'low' : ''}">Stok ${p.stock} ${esc(p.unit)}</small>
+      <button class="secondary" data-add="${esc(p.id)}" ${p.stock <= (cart[p.id] || 0) ? 'disabled' : ''}>
+        ${p.stock === 0 ? 'Stok habis' : '+ Keranjang'}
       </button>
     </article>`).join('') || '<p class="empty">Produk tidak ditemukan.</p>';
 }
+
 function renderCart() {
   const lines = cartLines();
+  const roleLabel = isAdmin() ? 'mulai jualan' : 'mulai belanja';
   $('#cart-items').innerHTML = lines.map(p => `
     <div class="cart-row">
-      <div class="between"><strong>${esc(p.name)}</strong><small>${money(p.price*p.qty)}</small></div>
+      <div class="between"><strong>${esc(p.name)}</strong><small>${money(p.price * p.qty)}</small></div>
       <div class="qty">
         <button class="secondary" data-minus="${esc(p.id)}" aria-label="Kurangi ${esc(p.name)}">−</button>
         <span>${p.qty} ${esc(p.unit)}</span>
-        <button class="secondary" data-add="${esc(p.id)}" aria-label="Tambah ${esc(p.name)}" ${p.qty>=p.stock?'disabled':''}>+</button>
+        <button class="secondary" data-add="${esc(p.id)}" aria-label="Tambah ${esc(p.name)}" ${p.qty >= p.stock ? 'disabled' : ''}>+</button>
       </div>
-    </div>`).join('') || '<div class="empty">🧺<br>Keranjang masih kosong.<br>Pilih produk untuk mulai jualan.</div>';
+    </div>`).join('') || `<div class="empty">🧺<br>Keranjang masih kosong.<br>Pilih produk untuk ${roleLabel}.</div>`;
   $('#cart-total').textContent = money(cartTotal());
-  $('#checkout').disabled = lines.length===0;
+  $('#checkout').disabled = lines.length === 0;
+
+  const cashLabel = $('#cash').closest('label');
+  cashLabel.hidden = !isAdmin();
+  $('#checkout').textContent = isAdmin() ? 'Selesaikan transaksi →' : 'Checkout pesanan →';
 }
-function render() {
-  const today = new Date().toDateString();
-  const salesToday = db.sales.filter(s => new Date(s.date).toDateString()===today);
-  $('#sales-stats').innerHTML =
-    stat('Penjualan hari ini',money(salesToday.reduce((n,s)=>n+s.total,0)),'Transaksi tunai') +
-    stat('Transaksi hari ini',salesToday.length+' transaksi','Tersimpan di perangkat') +
-    stat('Stok menipis',db.products.filter(p=>p.stock<=5).length+' produk','Stok ≤ 5 satuan');
-  renderProducts();
-  renderCart();
-  $('#stock-table').innerHTML = db.products.map(p=>`
+
+function renderStockTable() {
+  $('#stock-table').innerHTML = db.products.map(p => `
     <tr>
       <td>${esc(p.icon)} ${esc(p.name)}</td>
       <td>${money(p.price)} / ${esc(p.unit)}</td>
-      <td class="${p.stock<=5?'low':''}">${p.stock} ${esc(p.unit)}</td>
+      <td class="${p.stock <= 5 ? 'low' : ''}">${p.stock} ${esc(p.unit)}</td>
       <td>
         <div class="actions">
           <button class="secondary" data-restock="${esc(p.id)}">+ Stok</button>
@@ -518,29 +879,70 @@ function render() {
         </div>
       </td>
     </tr>`).join('') || '<tr><td colspan="4" class="empty">Belum ada produk. Tambahkan produk baru untuk mulai berjualan.</td></tr>';
-  const recentSales = [...db.sales].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,8);
-  $('#sales-history').innerHTML = recentSales.map(sale => `
+}
+
+function renderSalesOrOrders() {
+  if (isAdmin()) {
+    const recentSales = [...db.sales].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 8);
+    $('#sales-history').innerHTML = recentSales.map(sale => `
+      <tr>
+        <td>${esc(new Date(sale.date).toLocaleString('id-ID'))}</td>
+        <td>${esc((sale.items || []).map(item => `${item.name} × ${item.qty}`).join('; ') || 'Penjualan')}</td>
+        <td>${money(looseInteger(sale.total, 0, 0))}</td>
+        <td>${money(looseInteger(sale.change, 0, 0))}</td>
+      </tr>
+    `).join('') || '<tr><td colspan="4" class="empty">Belum ada penjualan. Selesaikan transaksi pertama dari keranjang.</td></tr>';
+    const lastSale = recentSales[0];
+    $('#checkout-status').textContent = lastSale
+      ? `Transaksi terakhir: ${new Date(lastSale.date).toLocaleTimeString('id-ID')} · Kembalian ${money(looseInteger(lastSale.change, 0, 0))}`
+      : 'Belum ada transaksi pada sesi ini.';
+  } else {
+    const myOrders = db.purchaseOrders
+      .filter(order => order.consumerId === currentUser.id)
+      .sort((a, b) => new Date(b.date) - new Date(a.date));
+    $('#sales-history').innerHTML = myOrders.slice(0, 8).map(order => `
+      <tr>
+        <td>${esc(new Date(order.date).toLocaleString('id-ID'))}</td>
+        <td>${esc(order.orderNo)} · ${esc(order.items.map(item => `${item.name} × ${item.qty}`).join('; '))}</td>
+        <td>${money(order.total)}</td>
+        <td>${esc(order.status)}</td>
+      </tr>
+    `).join('') || '<tr><td colspan="4" class="empty">Belum ada pembelian. Tambahkan produk lalu checkout.</td></tr>';
+    const lastOrder = myOrders[0];
+    $('#checkout-status').textContent = lastOrder
+      ? `Pesanan terakhir: ${lastOrder.orderNo} · ${lastOrder.status}`
+      : 'Belum ada pembelian pada akun ini.';
+  }
+}
+
+function renderConsumerHistoryPage() {
+  const myOrders = db.purchaseOrders
+    .filter(order => order.consumerId === currentUser?.id)
+    .sort((a, b) => new Date(b.date) - new Date(a.date));
+  $('#consumer-history').innerHTML = myOrders.map(order => `
     <tr>
-      <td>${esc(new Date(sale.date).toLocaleString('id-ID'))}</td>
-      <td>${esc((sale.items || []).map(item => `${item.name} × ${item.qty}`).join('; ') || 'Penjualan tunai')}</td>
-      <td>${money(looseInteger(sale.total,0,0))}</td>
-      <td>${money(looseInteger(sale.change,0,0))}</td>
+      <td>${esc(order.orderNo)}</td>
+      <td>${esc(new Date(order.date).toLocaleString('id-ID'))}</td>
+      <td>${esc(order.items.map(item => `${item.name} × ${item.qty}`).join('; '))}</td>
+      <td>${esc(order.status)}</td>
+      <td>${money(order.total)}</td>
     </tr>
-  `).join('') || '<tr><td colspan="4" class="empty">Belum ada penjualan. Selesaikan transaksi pertama dari keranjang.</td></tr>';
-  const lastSale = recentSales[0];
-  $('#checkout-status').textContent = lastSale
-    ? `Transaksi terakhir: ${new Date(lastSale.date).toLocaleTimeString('id-ID')} · Kembalian ${money(looseInteger(lastSale.change,0,0))}`
-    : 'Belum ada transaksi pada sesi ini.';
-  const income = db.sales.reduce((n,s)=>n+s.total,0);
-  const expenses = db.expenses.reduce((n,e)=>n+e.amount,0);
+  `).join('') || '<tr><td colspan="5" class="empty">Belum ada riwayat pembelian.</td></tr>';
+}
+
+function renderFinance() {
+  const income = db.sales.reduce((n, s) => n + s.total, 0);
+  const expenses = db.expenses.reduce((n, e) => n + e.amount, 0);
   $('#finance-stats').innerHTML =
-    stat('Total penjualan',money(income),'Seluruh periode') +
-    stat('Pengeluaran',money(expenses),'Seluruh periode') +
-    stat('Arus kas bersih',money(income-expenses),'Bukan laba usaha');
+    stat('Total penjualan', money(income), 'Seluruh periode') +
+    stat('Pengeluaran', money(expenses), 'Seluruh periode') +
+    stat('Arus kas bersih', money(income - expenses), 'Bukan laba usaha');
+
   const history = [
-    ...db.sales.map(s=>({...s,label:'Penjualan · '+s.items.map(p=>`${p.name} × ${p.qty}`).join('; '),income:s.total,out:0})),
-    ...db.expenses.map(e=>({...e,label:e.note,income:0,out:e.amount}))
-  ].sort((a,b)=>new Date(b.date)-new Date(a.date));
+    ...db.sales.map(s => ({ ...s, label: 'Penjualan · ' + s.items.map(p => `${p.name} × ${p.qty}`).join('; '), income: s.total, out: 0 })),
+    ...db.expenses.map(e => ({ ...e, label: e.note, income: 0, out: e.amount }))
+  ].sort((a, b) => new Date(b.date) - new Date(a.date));
+
   const historyQuery = $('#history-search').value.toLocaleLowerCase('id-ID').trim();
   const days = $('#history-period').value === 'all' ? null : Number($('#history-period').value);
   const now = Date.now();
@@ -551,31 +953,36 @@ function render() {
     const age = now - new Date(item.date).getTime();
     return age >= 0 && age <= days * 24 * 60 * 60 * 1000;
   });
-  $('#history').innerHTML = filteredHistory.map(h=>`
+
+  $('#history').innerHTML = filteredHistory.map(h => `
     <tr><td>${esc(new Date(h.date).toLocaleString('id-ID'))}</td>
-    <td>${esc(h.label)}</td><td>${h.income?money(h.income):'—'}</td>
-    <td>${h.out?money(h.out):'—'}</td></tr>`).join('') ||
+    <td>${esc(h.label)}</td><td>${h.income ? money(h.income) : '—'}</td>
+    <td>${h.out ? money(h.out) : '—'}</td></tr>`).join('') ||
     '<tr><td colspan="4" class="empty">Belum ada transaksi.</td></tr>';
+
   const monthly = new Map();
   [...db.sales, ...db.expenses].forEach(item => {
     const date = new Date(item.date);
     if (Number.isNaN(date.getTime())) return;
-    const key = date.toISOString().slice(0,7);
-    if (!monthly.has(key)) monthly.set(key,{income:0,out:0});
+    const key = date.toISOString().slice(0, 7);
+    if (!monthly.has(key)) monthly.set(key, { income: 0, out: 0 });
     const row = monthly.get(key);
-    if (Object.prototype.hasOwnProperty.call(item,'total')) row.income += Number(item.total) || 0;
-    if (Object.prototype.hasOwnProperty.call(item,'amount')) row.out += Number(item.amount) || 0;
+    if (Object.prototype.hasOwnProperty.call(item, 'total')) row.income += Number(item.total) || 0;
+    if (Object.prototype.hasOwnProperty.call(item, 'amount')) row.out += Number(item.amount) || 0;
   });
-  const trend = [...monthly.entries()].sort((a,b)=>a[0].localeCompare(b[0])).slice(-6);
-  $('#trend-list').innerHTML = trend.map(([month,row])=>`
+  const trend = [...monthly.entries()].sort((a, b) => a[0].localeCompare(b[0])).slice(-6);
+  $('#trend-list').innerHTML = trend.map(([month, row]) => `
     <div class="trend-row">
-      <strong>${esc(new Date(month + '-01T00:00:00.000Z').toLocaleDateString('id-ID',{month:'short',year:'numeric'}))}</strong>
+      <strong>${esc(new Date(month + '-01T00:00:00.000Z').toLocaleDateString('id-ID', { month: 'short', year: 'numeric' }))}</strong>
       <span>Masuk: ${money(row.income)}</span>
       <span>Keluar: ${money(row.out)}</span>
-      <span>Bersih: ${money(row.income-row.out)}</span>
+      <span>Bersih: ${money(row.income - row.out)}</span>
     </div>
   `).join('') || '<p class="empty">Belum cukup data untuk menampilkan tren bulanan.</p>';
-  $('#merchants').innerHTML = merchants.map(m=>`
+}
+
+function renderMerchants() {
+  $('#merchants').innerHTML = merchants.map(m => `
     <article class="merchant">
       <span class="pill">Pedagang contoh</span>
       <h3 style="margin-top:9px">${m.icon} ${esc(m.name)}</h3>
@@ -585,7 +992,11 @@ function render() {
         <button data-order="${m.id}">Pesan</button>
       </div>
     </article>`).join('');
-  $('#orders').innerHTML = [...db.orders].reverse().map(o=>`
+
+  const orders = isKonsumer()
+    ? db.orders.filter(order => order.consumerId === currentUser.id)
+    : db.orders;
+  $('#orders').innerHTML = [...orders].reverse().map(o => `
     <div class="cart-row">
       <div class="between"><strong>${esc(o.merchant)}</strong><span class="pill">Draft lokal</span></div>
       <p>${esc(o.good)} × ${o.qty} · ${money(o.total)}</p>
@@ -593,22 +1004,74 @@ function render() {
     </div>`).join('') || '<p class="empty">Belum ada draft pemesanan.</p>';
 }
 
-function openEditor(title,fields,action) {
+function renderDashboardHead() {
+  const title = $('#page-kasir h1');
+  const desc = $('#page-kasir .muted');
+  const badge = $('#page-kasir .page-head .pill');
+  if (isAdmin()) {
+    title.textContent = 'Siap jualan hari ini?';
+    desc.textContent = 'Catat transaksi. Stok langsung terkelola.';
+    badge.textContent = 'Mode Admin';
+  } else {
+    title.textContent = 'Belanja kebutuhan hari ini';
+    desc.textContent = 'Pilih produk, masukkan keranjang, lalu checkout sederhana.';
+    badge.textContent = 'Mode Konsumer';
+  }
+}
+
+function renderStats() {
+  if (isAdmin()) {
+    const today = new Date().toDateString();
+    const salesToday = db.sales.filter(s => new Date(s.date).toDateString() === today);
+    $('#sales-stats').innerHTML =
+      stat('Penjualan hari ini', money(salesToday.reduce((n, s) => n + s.total, 0)), 'Transaksi tersimpan') +
+      stat('Transaksi hari ini', salesToday.length + ' transaksi', 'Kasir & konsumer') +
+      stat('Stok menipis', db.products.filter(p => p.stock <= 5).length + ' produk', 'Stok ≤ 5 satuan');
+  } else {
+    const mine = db.purchaseOrders.filter(order => order.consumerId === currentUser.id);
+    $('#sales-stats').innerHTML =
+      stat('Total pembelian saya', money(mine.reduce((n, order) => n + order.total, 0)), 'Semua periode') +
+      stat('Jumlah pesanan', mine.length + ' pesanan', 'Akun ini saja') +
+      stat('Produk tersedia', db.products.filter(p => p.stock > 0).length + ' produk', 'Bisa dibeli sekarang');
+  }
+}
+
+function render() {
+  renderTopbar();
+  if (!currentUser) return;
+  ensureCartOwner();
+  renderNavigation();
+  renderDashboardHead();
+  renderStats();
+  renderProducts();
+  renderCart();
+  renderStockTable();
+  renderSalesOrOrders();
+  renderConsumerHistoryPage();
+  renderMerchants();
+  renderFinance();
+  if (!canAccessPage(currentUser.role, activePage)) activePage = isAdmin() ? 'kasir' : 'kasir';
+  setPage(activePage);
+}
+
+function openEditor(title, fields, action) {
   $('#editor-title').textContent = title;
   $('#editor-fields').innerHTML = fields;
   editAction = action;
   $('#editor').showModal();
 }
+
 function editProduct(id) {
+  if (!requireRole('admin', 'Hanya Admin yang dapat mengubah produk.')) return;
   const p = db.products.find(x => x.id === id);
   if (!p) return;
-  openEditor('Edit produk · ' + p.name,`
+  openEditor('Edit produk · ' + p.name, `
     <label>Nama produk<input name="name" maxlength="70" required value="${esc(p.name)}"></label>
-    ${numberField('Harga jual per satuan (Rp)','price',1,p.price)}
-    ${numberField('Stok','stock',0,p.stock)}
-    <label>Satuan<select name="unit">${units.map(unit => `<option ${unit===p.unit?'selected':''}>${unit}</option>`).join('')}</select></label>
+    ${numberField('Harga jual per satuan (Rp)', 'price', 1, p.price)}
+    ${numberField('Stok', 'stock', 0, p.stock)}
+    <label>Satuan<select name="unit">${units.map(unit => `<option ${unit === p.unit ? 'selected' : ''}>${unit}</option>`).join('')}</select></label>
     <label>Ikon produk<input name="icon" maxlength="6" value="${esc(p.icon)}"></label>`,
-  form=>{
+  form => {
     const nextProduct = normalizeProduct({
       ...p,
       name: form.get('name'),
@@ -619,12 +1082,13 @@ function editProduct(id) {
     });
     return commit(next => {
       const target = next.products.find(x => x.id === id);
-      Object.assign(target,nextProduct);
+      Object.assign(target, nextProduct);
     });
   });
 }
 
 function removeProduct(id) {
+  if (!requireRole('admin', 'Hanya Admin yang dapat menghapus produk.')) return;
   const p = db.products.find(x => x.id === id);
   if (!p) return;
   if (!confirm(`Hapus produk "${p.name}" dari katalog?`)) return;
@@ -637,11 +1101,12 @@ function removeProduct(id) {
 }
 
 async function restoreBackup(file) {
+  if (!requireRole('admin', 'Hanya Admin yang dapat memulihkan backup.')) return;
   if (!file) return;
   try {
     const raw = await file.text();
     const parsed = JSON.parse(raw);
-    const restored = normalizeDb(parsed);
+    const restored = await normalizeDb(parsed);
     if (!commit(next => Object.assign(next, restored))) return;
     cart = {};
     $('#cash').value = '';
@@ -651,109 +1116,289 @@ async function restoreBackup(file) {
     toast('Gagal memulihkan backup: ' + error.message);
   }
 }
-function numberField(label,name,min=1,value='') {
+
+function numberField(label, name, min = 1, value = '') {
   return `<label>${esc(label)}<input name="${name}" type="number" min="${min}" max="1000000000" step="1" value="${value}" inputmode="numeric" required></label>`;
 }
-function integer(value,min=1,max=1000000000) {
-  const n=Number(value);
-  if (!Number.isSafeInteger(n)||n<min||n>max) throw new Error(`Isi bilangan bulat ${min}–${max}.`);
+
+function integer(value, min = 1, max = 1000000000) {
+  const n = Number(value);
+  if (!Number.isSafeInteger(n) || n < min || n > max) throw new Error(`Isi bilangan bulat ${min}–${max}.`);
   return n;
 }
+
 function text(value) {
-  const s=String(value||'').trim();
+  const s = String(value || '').trim();
   if (!s) throw new Error('Isian tidak boleh kosong.');
   return s;
 }
+
 function addQuantity(id) {
-  const p=db.products.find(p=>p.id===id);
+  if (!requireRole(['admin', 'konsumer'], 'Silakan login sebagai Admin atau Konsumer untuk berbelanja.')) return;
+  const p = db.products.find(x => x.id === id);
   if (!p) return;
-  if ((cart[id]||0)>=p.stock) return toast('Stok tidak mencukupi.');
-  cart[id]=(cart[id]||0)+1;
-  renderCart(); renderProducts();
+  if ((cart[id] || 0) >= p.stock) return toast('Stok tidak mencukupi.');
+  cart[id] = (cart[id] || 0) + 1;
+  renderCart();
+  renderProducts();
 }
-function checkout() {
-  const lines=cartLines();
+
+function checkoutAdmin() {
+  if (!requireRole('admin', 'Checkout kasir hanya untuk Admin.')) return;
+  const lines = cartLines();
   if (!lines.length) return;
-  const total=cartTotal();
-  const cash=Number($('#cash').value);
-  if (!Number.isSafeInteger(cash)||cash<total||!Number.isSafeInteger(total)) {
+  const total = cartTotal();
+  const cash = Number($('#cash').value);
+  if (!Number.isSafeInteger(cash) || cash < total || !Number.isSafeInteger(total)) {
     return toast('Masukkan uang tunai yang cukup dalam rupiah bulat.');
   }
-  const sale={id:uid(),date:new Date().toISOString(),items:lines,total,cash,change:cash-total};
-  if (!commit(next=>{
+  const sale = {
+    id: uid(),
+    date: new Date().toISOString(),
+    items: lines,
+    total,
+    cash,
+    change: cash - total,
+    source: 'admin',
+    consumerId: null,
+    paymentMethod: 'Tunai'
+  };
+  if (!commit(next => {
     for (const line of lines) {
-      const p=next.products.find(p=>p.id===line.id);
-      if (!p||p.stock<line.qty) throw new Error('Stok berubah. Periksa keranjang.');
-      p.stock-=line.qty;
+      const p = next.products.find(product => product.id === line.id);
+      if (!p || p.stock < line.qty) throw new Error('Stok berubah. Periksa keranjang.');
+      p.stock -= line.qty;
     }
     next.sales.push(sale);
   })) return;
-  cart={}; $('#cash').value='';
+  cart = {};
+  $('#cash').value = '';
   render();
-  toast('Transaksi tersimpan. Kembalian: '+money(sale.change));
+  toast('Transaksi tersimpan. Kembalian: ' + money(sale.change));
 }
+
+function checkoutKonsumer() {
+  if (!requireRole('konsumer', 'Checkout konsumer hanya untuk akun Konsumer.')) return;
+  const lines = cartLines();
+  if (!lines.length) return;
+  const total = cartTotal();
+  openEditor('Checkout Pesanan', `
+    <p class="muted">Pastikan jumlah produk sudah benar sebelum checkout.</p>
+    <label>Nama pembeli<input name="buyerName" maxlength="70" required value="${esc(currentUser.name)}"></label>
+    <label>Metode pembayaran
+      <select name="paymentMethod" required>
+        <option>Transfer (simulasi)</option>
+        <option>Tunai saat ambil</option>
+        <option>COD (simulasi)</option>
+      </select>
+    </label>
+    <p class="muted">Total: <strong>${money(total)}</strong></p>`,
+    form => {
+      const buyerName = text(form.get('buyerName'));
+      const paymentMethod = text(form.get('paymentMethod'));
+      const latestLines = cartLines();
+      if (!latestLines.length) throw new Error('Keranjang kosong. Tambahkan produk terlebih dahulu.');
+      const latestTotal = latestLines.reduce((sum, item) => sum + item.price * item.qty, 0);
+      const orderNo = `ORD-${Date.now().toString().slice(-8)}-${Math.random().toString(36).slice(2, 5).toUpperCase()}`;
+      const order = {
+        id: uid(),
+        orderNo,
+        date: new Date().toISOString(),
+        consumerId: currentUser.id,
+        buyerName,
+        paymentMethod,
+        status: 'Berhasil (simulasi)',
+        items: latestLines,
+        total: latestTotal
+      };
+      const sale = {
+        id: uid(),
+        date: order.date,
+        items: latestLines,
+        total: latestTotal,
+        cash: latestTotal,
+        change: 0,
+        source: 'konsumer',
+        consumerId: currentUser.id,
+        paymentMethod
+      };
+      if (!commit(next => {
+        for (const line of latestLines) {
+          const p = next.products.find(product => product.id === line.id);
+          if (!p || p.stock < line.qty) throw new Error('Stok berubah saat checkout. Silakan cek ulang keranjang.');
+          p.stock -= line.qty;
+        }
+        next.purchaseOrders.push(order);
+        next.sales.push(sale);
+      })) return false;
+      cart = {};
+      $('#cash').value = '';
+      render();
+      toast(`Checkout berhasil. ID pesanan: ${orderNo}`);
+      return true;
+    }
+  );
+}
+
 function createOrder(id) {
-  const m=merchants.find(x=>x.id===id);
-  openEditor('Pesan · '+m.name,`
+  if (!requireRole(['admin', 'konsumer'], 'Silakan login untuk membuat draft pesanan.')) return;
+  const m = merchants.find(x => x.id === id);
+  openEditor('Pesan · ' + m.name, `
     <p class="muted">Draft disimpan di perangkat, tidak dikirim ke pedagang.</p>
-    <label>Barang<select name="good">${m.goods.map((g,i)=>`<option value="${i}">${esc(g.name)} — ${money(g.price)}</option>`).join('')}</select></label>
-    ${numberField('Jumlah satuan','qty',1,1)}
+    <label>Barang<select name="good">${m.goods.map((g, i) => `<option value="${i}">${esc(g.name)} — ${money(g.price)}</option>`).join('')}</select></label>
+    ${numberField('Jumlah satuan', 'qty', 1, 1)}
     <label>Titik pengambilan<input value="${esc(m.pickup)}" readonly></label>`,
-    form=>{
-      const good=m.goods[integer(form.get('good'),0,m.goods.length-1)];
-      const qty=integer(form.get('qty'),1,999);
-      return commit(next=>next.orders.push({
-        id:uid(),date:new Date().toISOString(),merchant:m.name,
-        good:good.name,qty,total:good.price*qty,pickup:m.pickup
-      }));
-    });
+  form => {
+    const good = m.goods[integer(form.get('good'), 0, m.goods.length - 1)];
+    const qty = integer(form.get('qty'), 1, 999);
+    return commit(next => next.orders.push({
+      id: uid(),
+      date: new Date().toISOString(),
+      merchant: m.name,
+      good: good.name,
+      qty,
+      total: good.price * qty,
+      pickup: m.pickup,
+      consumerId: currentUser.id
+    }));
+  });
 }
+
+async function handleSignup(event) {
+  event.preventDefault();
+  const form = new FormData(event.target);
+  try {
+    const name = text(form.get('name'));
+    const loginNorm = normalizeLogin(form.get('login'));
+    const login = String(form.get('login')).trim();
+    const password = String(form.get('password') || '');
+    const confirmPassword = String(form.get('confirmPassword') || '');
+    const role = normalizeRole(form.get('role'));
+    if (!role) throw new Error('Role tidak valid.');
+    if (password.length < 8) throw new Error('Password minimal 8 karakter.');
+    if (password !== confirmPassword) throw new Error('Konfirmasi password tidak cocok.');
+    if (db.users.some(user => user.loginNorm === loginNorm)) throw new Error('Akun dengan email/username tersebut sudah ada.');
+    const passwordHash = await hashPassword(password);
+    const user = {
+      id: uid(),
+      name,
+      login,
+      loginNorm,
+      passwordHash,
+      role,
+      createdAt: new Date().toISOString()
+    };
+    if (!commit(next => {
+      next.users.push(user);
+      next.currentSession = { userId: user.id, loginAt: new Date().toISOString() };
+    })) return;
+    $('#signup-status').textContent = `Akun ${role} berhasil dibuat dan login otomatis.`;
+    event.target.reset();
+    activePage = role === 'admin' ? 'kasir' : 'kasir';
+    render();
+    toast('Signup berhasil. Selamat datang di PasarKita!');
+  } catch (error) {
+    $('#signup-status').textContent = error.message;
+    toast(error.message);
+  }
+}
+
+async function handleLogin(event) {
+  event.preventDefault();
+  const form = new FormData(event.target);
+  try {
+    const loginNorm = normalizeLogin(form.get('login'));
+    const password = String(form.get('password') || '');
+    const user = db.users.find(item => item.loginNorm === loginNorm);
+    if (!user) throw new Error('Akun tidak ditemukan. Periksa email/username Anda.');
+    const passOK = await verifyPassword(password, user.passwordHash);
+    if (!passOK) throw new Error('Password salah.');
+    if (!commit(next => {
+      next.currentSession = { userId: user.id, loginAt: new Date().toISOString() };
+    })) return;
+    $('#login-status').textContent = 'Login berhasil.';
+    event.target.reset();
+    activePage = user.role === 'admin' ? 'kasir' : 'kasir';
+    render();
+    toast(`Selamat datang, ${user.name}.`);
+  } catch (error) {
+    $('#login-status').textContent = error.message;
+    toast(error.message);
+  }
+}
+
+function handleLogout() {
+  if (!currentUser) return;
+  if (!commit(next => {
+    next.currentSession = null;
+  })) return;
+  cart = {};
+  $('#cash').value = '';
+  activePage = 'kasir';
+  render();
+  toast('Anda sudah logout.');
+}
+
 function bindEvents() {
-  document.querySelectorAll('[data-page]').forEach(button=>{
-    button.addEventListener('click',()=>{
-      document.querySelectorAll('main > section').forEach(s=>s.hidden=true);
-      $('#page-'+button.dataset.page).hidden=false;
-      document.querySelectorAll('[data-page]').forEach(b=>{
-        b.classList.toggle('active',b===button);
-        if (b===button) b.setAttribute('aria-current','page');
-        else b.removeAttribute('aria-current');
-      });
-      if (button.dataset.page==='pasar') initMap();
+  document.querySelectorAll('[data-page]').forEach(button => {
+    button.addEventListener('click', () => {
+      setPage(button.dataset.page, 'Menu ini tidak tersedia untuk role Anda.');
     });
   });
-  $('#search').addEventListener('input',renderProducts);
-  $('#history-search').addEventListener('input',render);
-  $('#history-period').addEventListener('change',render);
-  $('#clear-cart').onclick=()=>{cart={};renderCart();renderProducts();};
-  $('#checkout').onclick=checkout;
-  $('#cancel-editor').onclick=()=>$('#editor').close();
-  $('#editor-form').onsubmit=event=>{
+
+  $('#login-form').addEventListener('submit', handleLogin);
+  $('#signup-form').addEventListener('submit', handleSignup);
+  $('#logout').addEventListener('click', handleLogout);
+
+  $('#search').addEventListener('input', renderProducts);
+  $('#history-search').addEventListener('input', render);
+  $('#history-period').addEventListener('change', render);
+  $('#clear-cart').onclick = () => {
+    if (!requireRole(['admin', 'konsumer'])) return;
+    cart = {};
+    renderCart();
+    renderProducts();
+  };
+  $('#checkout').onclick = () => {
+    if (isAdmin()) checkoutAdmin();
+    else checkoutKonsumer();
+  };
+  $('#cancel-editor').onclick = () => $('#editor').close();
+  $('#editor-form').onsubmit = async event => {
     event.preventDefault();
     try {
-      if (editAction(new FormData(event.target))) {
-        $('#editor').close(); render(); toast('Berhasil disimpan di perangkat.');
+      if (await editAction(new FormData(event.target))) {
+        $('#editor').close();
+        render();
+        toast('Berhasil disimpan di perangkat.');
       }
-    } catch(error) { toast(error.message); }
+    } catch (error) {
+      toast(error.message);
+    }
   };
-  document.addEventListener('click',event=>{
-    const b=event.target.closest('button');
+
+  document.addEventListener('click', event => {
+    const b = event.target.closest('button');
     if (!b) return;
     if (b.dataset.add) addQuantity(b.dataset.add);
     if (b.dataset.minus) {
-      const id=b.dataset.minus;
-      cart[id]=(cart[id]||0)-1;
-      if (cart[id]<=0) delete cart[id];
-      renderCart();renderProducts();
+      if (!requireRole(['admin', 'konsumer'])) return;
+      const id = b.dataset.minus;
+      cart[id] = (cart[id] || 0) - 1;
+      if (cart[id] <= 0) delete cart[id];
+      renderCart();
+      renderProducts();
     }
     if (b.dataset.restock) {
-      const id=b.dataset.restock;
-      const p=db.products.find(x=>x.id===id);
-      openEditor('Tambah stok · '+p.name,numberField('Jumlah tambahan ('+p.unit+')','qty'),
-        form=>{
-          const qty=integer(form.get('qty'));
-          return commit(next=>{
-            const product=next.products.find(x=>x.id===id);
-            product.stock=integer(product.stock+qty,0);
+      if (!requireRole('admin', 'Hanya Admin yang dapat menambah stok.')) return;
+      const id = b.dataset.restock;
+      const p = db.products.find(x => x.id === id);
+      openEditor('Tambah stok · ' + p.name, numberField('Jumlah tambahan (' + p.unit + ')', 'qty'),
+        form => {
+          const qty = integer(form.get('qty'));
+          return commit(next => {
+            const product = next.products.find(x => x.id === id);
+            product.stock = integer(product.stock + qty, 0);
           });
         });
     }
@@ -761,139 +1406,214 @@ function bindEvents() {
     if (b.dataset.delete) removeProduct(b.dataset.delete);
     if (b.dataset.order) createOrder(b.dataset.order);
     if (b.dataset.locate) {
-      const m=merchants.find(x=>x.id===b.dataset.locate);
+      const m = merchants.find(x => x.id === b.dataset.locate);
       if (!map) return toast('Peta belum tersedia. Daftar pedagang tetap dapat digunakan.');
-      map.setView([m.lat,m.lng],16);
+      map.setView([m.lat, m.lng], 16);
       markers[m.id].openPopup();
-      $('#map').scrollIntoView({behavior:'smooth',block:'center'});
+      $('#map').scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   });
-  $('#add-product').onclick=()=>openEditor('Tambah produk',`
+
+  $('#add-product').onclick = () => {
+    if (!requireRole('admin', 'Hanya Admin yang dapat menambah produk.')) return;
+    openEditor('Tambah produk', `
     <label>Nama produk<input name="name" maxlength="70" required placeholder="Contoh: Gula pasir"></label>
-    ${numberField('Harga jual per satuan (Rp)','price')}
-    ${numberField('Stok awal','stock',0,0)}
-  <label>Satuan<select name="unit">${units.map(unit => `<option>${unit}</option>`).join('')}</select></label>`,
-    form=>{
-    const product=normalizeProduct({id:uid(),name:form.get('name'),price:form.get('price'),
-      stock:form.get('stock'),unit:form.get('unit'),icon:'📦'});
-      return commit(next=>next.products.push(product));
+    ${numberField('Harga jual per satuan (Rp)', 'price')}
+    ${numberField('Stok awal', 'stock', 0, 0)}
+    <label>Satuan<select name="unit">${units.map(unit => `<option>${unit}</option>`).join('')}</select></label>`,
+    form => {
+      const product = normalizeProduct({
+        id: uid(),
+        name: form.get('name'),
+        price: form.get('price'),
+        stock: form.get('stock'),
+        unit: form.get('unit'),
+        icon: '📦'
+      });
+      return commit(next => next.products.push(product));
     });
-  $('#add-expense').onclick=()=>openEditor('Catat pengeluaran',`
+  };
+
+  $('#add-expense').onclick = () => {
+    if (!requireRole('admin', 'Hanya Admin yang dapat mencatat pengeluaran.')) return;
+    openEditor('Catat pengeluaran', `
     <label>Keterangan<input name="note" maxlength="120" required placeholder="Contoh: Belanja stok atau biaya angkut"></label>
-    ${numberField('Nominal (Rp)','amount')}`,
-    form=>{
-      const entry={id:uid(),date:new Date().toISOString(),note:text(form.get('note')),
-        amount:integer(form.get('amount'))};
-      return commit(next=>next.expenses.push(entry));
+    ${numberField('Nominal (Rp)', 'amount')}`,
+    form => {
+      const entry = {
+        id: uid(),
+        date: new Date().toISOString(),
+        note: text(form.get('note')),
+        amount: integer(form.get('amount'))
+      };
+      return commit(next => next.expenses.push(entry));
     });
-  $('#backup').onclick=()=>{
-    const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');
-    a.href=url; a.download='pasarkita-backup-'+new Date().toISOString().slice(0,10)+'.json';
+  };
+
+  $('#backup').onclick = () => {
+    if (!requireRole('admin', 'Hanya Admin yang dapat membuat backup.')) return;
+    const exportData = {
+      ...db,
+      users: db.users.map(user => ({
+        id: user.id,
+        name: user.name,
+        login: user.login,
+        role: user.role,
+        passwordHash: user.passwordHash,
+        createdAt: user.createdAt
+      }))
+    };
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'pasarkita-backup-' + new Date().toISOString().slice(0, 10) + '.json';
     a.click();
-    setTimeout(()=>URL.revokeObjectURL(url),1000);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
     toast('Backup diunduh. Gunakan tombol "Pulihkan backup" untuk memuat kembali data.');
   };
-  $('#restore-trigger').onclick=()=>$('#restore-file').click();
-  $('#restore-file').onchange=event=>{
+
+  $('#restore-trigger').onclick = () => {
+    if (!requireRole('admin', 'Hanya Admin yang dapat memulihkan backup.')) return;
+    $('#restore-file').click();
+  };
+
+  $('#restore-file').onchange = event => {
     const [file] = event.target.files || [];
     restoreBackup(file);
     event.target.value = '';
   };
-  $('#reset-data').onclick=()=>{
-    if (!confirm('Reset semua data lokal? Tindakan ini tidak bisa dibatalkan.')) return;
-    if (!commit(next=>{
+
+  $('#reset-data').onclick = () => {
+    if (!requireRole('admin', 'Hanya Admin yang dapat reset data.')) return;
+    if (!confirm('Reset data transaksi lokal? Produk demo akan dikembalikan dan transaksi dihapus.')) return;
+    if (!commit(next => {
       const fresh = initialData();
       next.products = fresh.products;
       next.sales = [];
       next.expenses = [];
       next.orders = [];
+      next.purchaseOrders = [];
     })) return;
     cart = {};
     $('#cash').value = '';
     render();
-    toast('Data lokal berhasil direset.');
+    toast('Data transaksi lokal berhasil direset. Akun tetap tersimpan.');
   };
-  window.addEventListener('online',()=>{
+
+  window.addEventListener('online', () => {
     updateConnection();
     if (!$('#page-pasar').hidden) initMap();
   });
-  window.addEventListener('offline',updateConnection);
-  window.addEventListener('storage',event=>{
-    if (event.key===KEY) location.reload();
+  window.addEventListener('offline', updateConnection);
+  window.addEventListener('storage', async event => {
+    if (event.key !== KEY) return;
+    try {
+      db = await normalizeDb(JSON.parse(event.newValue));
+      syncCurrentUser();
+      render();
+    } catch {
+      location.reload();
+    }
   });
 }
 
 function updateConnection() {
-  $('#connection').textContent=navigator.onLine?'● Online · data lokal':'● Offline · data lokal';
-  $('#connection').classList.toggle('off',!navigator.onLine);
+  $('#connection').textContent = navigator.onLine ? '● Online · data lokal' : '● Offline · data lokal';
+  $('#connection').classList.toggle('off', !navigator.onLine);
 }
+
 function loadScript(url) {
-  return new Promise((resolve,reject)=>{
-    const s=document.createElement('script');
-    s.src=url;
-    s.onload=resolve;
-    s.onerror=()=>{s.remove();reject(new Error('Tidak dapat memuat pustaka peta.'));};
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = url;
+    s.onload = resolve;
+    s.onerror = () => { s.remove(); reject(new Error('Tidak dapat memuat pustaka peta.')); };
     document.head.appendChild(s);
   });
 }
+
 async function initMap() {
-  if (map) {setTimeout(()=>map.invalidateSize(),100);return;}
+  if (map) { setTimeout(() => map.invalidateSize(), 100); return; }
   if (mapLoading) return;
   if (!navigator.onLine) {
-    $('#map-status').textContent='Peta memerlukan internet. Pilih pedagang dari daftar untuk membuat draft offline.';
+    $('#map-status').textContent = 'Peta memerlukan internet. Pilih pedagang dari daftar untuk membuat draft offline.';
     return;
   }
-  mapLoading=true;
-  $('#map-status').textContent='Memuat peta…';
+  mapLoading = true;
+  $('#map-status').textContent = 'Memuat peta…';
   try {
     if (!window.L) {
       if (!$('#leaflet-css')) {
-        const css=document.createElement('link');
-        css.id='leaflet-css';css.rel='stylesheet';
-        css.href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+        const css = document.createElement('link');
+        css.id = 'leaflet-css'; css.rel = 'stylesheet';
+        css.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
         document.head.appendChild(css);
       }
       await loadScript('https://unpkg.com/leaflet@1.9.4/dist/leaflet.js');
     }
-    map=L.map('map').setView([-7.798,110.369],15);
-    const tiles=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{
-      maxZoom:19,
-      attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    map = L.map('map').setView([-7.798, 110.369], 15);
+    const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
-    tiles.on('tileerror',()=>{
-      $('#map-status').textContent='Sebagian peta gagal dimuat. Daftar pedagang tetap dapat digunakan.';
+    tiles.on('tileerror', () => {
+      $('#map-status').textContent = 'Sebagian peta gagal dimuat. Daftar pedagang tetap dapat digunakan.';
     });
-    merchants.forEach(m=>{
-      const content=document.createElement('div');
-      const title=document.createElement('strong');
-      title.textContent=m.name+' (contoh)';
-      const info=document.createElement('p');
-      info.textContent=m.pickup;
-      const button=document.createElement('button');
-      button.textContent='Buat draft pesanan';
-      button.addEventListener('click',()=>createOrder(m.id));
-      content.append(title,info,button);
-      markers[m.id]=L.marker([m.lat,m.lng]).addTo(map).bindPopup(content);
+    merchants.forEach(m => {
+      const content = document.createElement('div');
+      const title = document.createElement('strong');
+      title.textContent = m.name + ' (contoh)';
+      const info = document.createElement('p');
+      info.textContent = m.pickup;
+      const button = document.createElement('button');
+      button.textContent = 'Buat draft pesanan';
+      button.addEventListener('click', () => createOrder(m.id));
+      content.append(title, info, button);
+      markers[m.id] = L.marker([m.lat, m.lng]).addTo(map).bindPopup(content);
     });
-    $('#map-status').textContent='Ketuk penanda untuk memilih pedagang contoh. Peta tidak diunduh untuk penggunaan offline.';
-    setTimeout(()=>map.invalidateSize(),150);
+    $('#map-status').textContent = 'Ketuk penanda untuk memilih pedagang contoh. Peta tidak diunduh untuk penggunaan offline.';
+    setTimeout(() => map.invalidateSize(), 150);
   } catch {
-    $('#map-status').textContent='Peta gagal dimuat. Gunakan daftar pedagang, lalu buka kembali menu ini untuk mencoba lagi.';
-  } finally {mapLoading=false;}
+    $('#map-status').textContent = 'Peta gagal dimuat. Gunakan daftar pedagang, lalu buka kembali menu ini untuk mencoba lagi.';
+  } finally { mapLoading = false; }
+}
+
+async function boot() {
+  let recovered = false;
+  try {
+    const raw = localStorage.getItem(KEY);
+    db = raw ? await normalizeDb(JSON.parse(raw)) : await normalizeDb(initialData());
+    localStorage.setItem(KEY, JSON.stringify(db));
+  } catch {
+    recovered = true;
+    try {
+      db = await normalizeDb(initialData());
+      localStorage.setItem(KEY, JSON.stringify(db));
+    } catch {
+      $('main').innerHTML = '<div class="notice">Penyimpanan lokal tidak tersedia atau data aplikasi rusak. Coba browser normal dengan penyimpanan situs aktif.</div>';
+      return;
+    }
+  }
+  syncCurrentUser();
+  bindEvents();
+  updateConnection();
+  render();
+  if (!currentUser) showAuthScreen();
+  if (recovered) toast('Data lama tidak valid, aplikasi memulai data demo baru.');
 }
 
 boot();
 
-if ('serviceWorker' in navigator && ['http:','https:'].includes(location.protocol)) {
+if ('serviceWorker' in navigator && ['http:', 'https:'].includes(location.protocol)) {
   navigator.serviceWorker.register('./sw.js')
-    .then(()=>navigator.serviceWorker.ready)
-    .then(()=>$('#offline-status').textContent='Halaman siap offline. Data tetap lokal, tanpa sinkronisasi.')
-    .catch(()=>$('#offline-status').textContent='Cache offline belum aktif. Gunakan localhost atau HTTPS.');
+    .then(() => navigator.serviceWorker.ready)
+    .then(() => $('#offline-status').textContent = 'Halaman siap offline. Data tetap lokal, tanpa sinkronisasi.')
+    .catch(() => $('#offline-status').textContent = 'Cache offline belum aktif. Gunakan localhost atau HTTPS.');
 } else {
-  $('#offline-status').textContent='Untuk memuat ulang saat offline, jalankan melalui localhost atau HTTPS.';
+  $('#offline-status').textContent = 'Untuk memuat ulang saat offline, jalankan melalui localhost atau HTTPS.';
 }
+
 </script>
 </body>
 </html>
