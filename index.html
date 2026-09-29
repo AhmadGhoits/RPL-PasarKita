@@ -178,8 +178,19 @@
           <div class="between"><span>Total belanja</span><strong id="cart-total"></strong></div>
           <label>Uang diterima (Rp)<input id="cash" type="number" min="0" step="1" inputmode="numeric" placeholder="Contoh: 50000"></label>
           <button class="full" id="checkout">Selesaikan transaksi →</button>
+          <p id="checkout-status" class="muted" aria-live="polite" style="font-size:12px;margin-top:10px">Belum ada transaksi pada sesi ini.</p>
           <p class="muted" style="font-size:12px;margin-top:12px">Pembayaran tunai. Tidak memproses pembayaran digital.</p>
         </section>
+      </div>
+      <div class="panel section-gap">
+        <h2>Riwayat penjualan terbaru</h2>
+        <p class="muted">Menampilkan 8 transaksi kasir terakhir di perangkat ini.</p>
+        <div class="table-wrap" style="margin-top:12px">
+          <table>
+            <thead><tr><th>Waktu</th><th>Rincian</th><th>Total</th><th>Kembalian</th></tr></thead>
+            <tbody id="sales-history"></tbody>
+          </table>
+        </div>
       </div>
     </section>
 
@@ -347,31 +358,103 @@ function normalizeProduct(product) {
   };
 }
 
+function safeDate(value) {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? new Date().toISOString() : date.toISOString();
+}
+
+function looseInteger(value, fallback = 0, min = 0, max = 1000000000) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return fallback;
+  const i = Math.trunc(n);
+  if (!Number.isSafeInteger(i)) return fallback;
+  if (i < min) return fallback;
+  if (i > max) return max;
+  return i;
+}
+
 function normalizeDb(data) {
   if (!data || typeof data !== 'object') throw new Error('File backup tidak valid.');
   if (!Array.isArray(data.products) || !Array.isArray(data.sales) || !Array.isArray(data.expenses) || !Array.isArray(data.orders)) {
     throw new Error('Struktur backup tidak dikenali.');
   }
+  const products = data.products.map(product => {
+    try {
+      return normalizeProduct(product);
+    } catch {
+      return null;
+    }
+  }).filter(Boolean);
+  const sales = data.sales.filter(x => x && typeof x === 'object').map(sale => {
+    const items = Array.isArray(sale.items) ? sale.items.map(item => {
+      if (!item || typeof item !== 'object') return null;
+      const name = String(item.name || '').trim();
+      const price = looseInteger(item.price, 0, 0);
+      const qty = looseInteger(item.qty, 0, 1);
+      if (!name || qty === 0) return null;
+      return {
+        id: String(item.id || uid()).trim() || uid(),
+        name,
+        price,
+        qty,
+        unit: units.includes(String(item.unit || 'pcs').trim()) ? String(item.unit).trim() : 'pcs'
+      };
+    }).filter(Boolean) : [];
+    const derivedTotal = items.reduce((sum, item) => sum + item.price * item.qty, 0);
+    const total = looseInteger(sale.total, derivedTotal, 0);
+    const cash = Math.max(looseInteger(sale.cash, total, 0), total);
+    return {
+      id: String(sale.id || uid()).trim() || uid(),
+      date: safeDate(sale.date),
+      items,
+      total,
+      cash,
+      change: Math.max(looseInteger(sale.change, cash - total, 0), cash - total)
+    };
+  });
+  const expenses = data.expenses.filter(x => x && typeof x === 'object').map(expense => ({
+    id: String(expense.id || uid()).trim() || uid(),
+    date: safeDate(expense.date),
+    note: String(expense.note || expense.label || 'Pengeluaran').trim() || 'Pengeluaran',
+    amount: looseInteger(expense.amount, 0, 0)
+  }));
+  const orders = data.orders.filter(x => x && typeof x === 'object').map(order => ({
+    id: String(order.id || uid()).trim() || uid(),
+    date: safeDate(order.date),
+    merchant: String(order.merchant || 'Pedagang contoh').trim() || 'Pedagang contoh',
+    good: String(order.good || 'Paket barang').trim() || 'Paket barang',
+    qty: looseInteger(order.qty, 1, 1),
+    total: looseInteger(order.total, 0, 0),
+    pickup: String(order.pickup || 'Titik titip').trim() || 'Titik titip'
+  }));
   return {
-    products: data.products.map(normalizeProduct),
-    sales: data.sales.filter(x => x && typeof x === 'object'),
-    expenses: data.expenses.filter(x => x && typeof x === 'object'),
-    orders: data.orders.filter(x => x && typeof x === 'object')
+    products: products.length ? products : initialData().products,
+    sales,
+    expenses,
+    orders
   };
 }
 
 function boot() {
+  let recovered = false;
   try {
     const raw = localStorage.getItem(KEY);
     db = raw ? normalizeDb(JSON.parse(raw)) : initialData();
     localStorage.setItem(KEY, JSON.stringify(db));
   } catch {
-    $('main').innerHTML = '<div class="notice">Penyimpanan lokal tidak tersedia atau data aplikasi rusak. Coba browser normal dengan penyimpanan situs aktif. Data lama tidak ditimpa.</div>';
-    return;
+    recovered = true;
+    try {
+      db = initialData();
+      localStorage.setItem(KEY, JSON.stringify(db));
+    } catch {
+      $('main').innerHTML = '<div class="notice">Penyimpanan lokal tidak tersedia atau data aplikasi rusak. Coba browser normal dengan penyimpanan situs aktif.</div>';
+      return;
+    }
   }
   render();
   bindEvents();
   updateConnection();
+  if (recovered) toast('Data lama tidak valid, aplikasi memulai data demo baru.');
 }
 function cartLines() {
   return Object.entries(cart).map(([id,qty]) => {
@@ -434,7 +517,20 @@ function render() {
           <button class="danger" data-delete="${esc(p.id)}">Hapus</button>
         </div>
       </td>
-    </tr>`).join('');
+    </tr>`).join('') || '<tr><td colspan="4" class="empty">Belum ada produk. Tambahkan produk baru untuk mulai berjualan.</td></tr>';
+  const recentSales = [...db.sales].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,8);
+  $('#sales-history').innerHTML = recentSales.map(sale => `
+    <tr>
+      <td>${esc(new Date(sale.date).toLocaleString('id-ID'))}</td>
+      <td>${esc((sale.items || []).map(item => `${item.name} × ${item.qty}`).join('; ') || 'Penjualan tunai')}</td>
+      <td>${money(looseInteger(sale.total,0,0))}</td>
+      <td>${money(looseInteger(sale.change,0,0))}</td>
+    </tr>
+  `).join('') || '<tr><td colspan="4" class="empty">Belum ada penjualan. Selesaikan transaksi pertama dari keranjang.</td></tr>';
+  const lastSale = recentSales[0];
+  $('#checkout-status').textContent = lastSale
+    ? `Transaksi terakhir: ${new Date(lastSale.date).toLocaleTimeString('id-ID')} · Kembalian ${money(looseInteger(lastSale.change,0,0))}`
+    : 'Belum ada transaksi pada sesi ini.';
   const income = db.sales.reduce((n,s)=>n+s.total,0);
   const expenses = db.expenses.reduce((n,e)=>n+e.amount,0);
   $('#finance-stats').innerHTML =
