@@ -73,6 +73,12 @@
     table { width:100%; border-collapse:collapse; font-size:14px; text-align:left }
     th { font-weight:600; color:var(--muted); background:#f7f9f5 }
     th,td { padding:13px 12px; border-bottom:1px solid var(--line); white-space:nowrap }
+    .actions { display:flex; gap:8px; flex-wrap:wrap }
+    .actions button { min-height:34px; padding:6px 10px; border-radius:9px; font-size:13px }
+    .trend-list { display:grid; gap:8px; margin-top:12px }
+    .trend-row { display:grid; grid-template-columns:120px 1fr 1fr 1fr; gap:10px; align-items:center; font-size:13px }
+    .trend-row > strong { font-size:12px; color:var(--muted) }
+    .filters { display:grid; grid-template-columns:1fr 180px; gap:10px; margin:14px 0 8px }
     .market-grid { display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:18px }
     #map { height:420px; background:#e6edde; border-radius:16px; z-index:0; display:block }
     .merchant { background:white; border:1px solid var(--line); border-radius:15px; padding:16px; margin-bottom:12px }
@@ -116,6 +122,9 @@
       .stat small { font-size:11px }
       .split { grid-template-columns:1fr }
       .cart { position:static }
+      .filters { grid-template-columns:1fr }
+      .trend-row { grid-template-columns:100px 1fr; gap:4px 10px }
+      .trend-row span { grid-column:2 }
       .page-head { align-items:flex-start }
       .page-head button { font-size:12px }
       #map { height:310px }
@@ -215,10 +224,31 @@
       <div class="stats" id="finance-stats"></div>
       <div class="notice">Arus kas bersih = penjualan tunai − pengeluaran tercatat. Ini bukan laba karena belum menghitung harga pokok, piutang, atau utang.</div>
       <div class="panel">
-        <div class="between"><h2>Riwayat transaksi</h2><button class="secondary" id="backup">Unduh backup</button></div>
+        <div class="between">
+          <h2>Riwayat transaksi</h2>
+          <div class="actions">
+            <button class="secondary" id="backup">Unduh backup</button>
+            <button class="secondary" id="restore-trigger">Pulihkan backup</button>
+            <button class="danger" id="reset-data">Reset data</button>
+          </div>
+        </div>
+        <div class="filters">
+          <input id="history-search" type="search" placeholder="Cari keterangan transaksi…">
+          <select id="history-period" aria-label="Filter periode transaksi">
+            <option value="all">Semua periode</option>
+            <option value="30">30 hari terakhir</option>
+            <option value="90">90 hari terakhir</option>
+            <option value="365">1 tahun terakhir</option>
+          </select>
+        </div>
         <div class="table-wrap" style="margin-top:16px">
           <table><thead><tr><th>Waktu</th><th>Keterangan</th><th>Masuk</th><th>Keluar</th></tr></thead><tbody id="history"></tbody></table>
         </div>
+      </div>
+      <div class="panel section-gap">
+        <h2>Tren 6 bulan</h2>
+        <p class="muted">Ringkasan pemasukan, pengeluaran, dan arus kas bersih per bulan.</p>
+        <div id="trend-list" class="trend-list"></div>
       </div>
     </section>
 
@@ -237,6 +267,7 @@
   </form>
 </dialog>
 <div id="toast" role="status" hidden></div>
+<input id="restore-file" type="file" accept="application/json,.json" hidden>
 
 <script>
 'use strict';
@@ -252,6 +283,7 @@ const KEY = 'pasarkita-v1';
 const uid = () => crypto.randomUUID
   ? crypto.randomUUID()
   : Date.now().toString(36) + Math.random().toString(36).slice(2);
+const units = ['kg','liter','pcs','ikat','bungkus'];
 
 const initialData = () => ({
   products: [
@@ -301,13 +333,37 @@ function commit(change) {
   }
 }
 
+function normalizeProduct(product) {
+  const icon = String(product?.icon || '📦').trim() || '📦';
+  const unit = text(product?.unit || 'pcs');
+  if (!units.includes(unit)) throw new Error('Satuan produk tidak valid.');
+  return {
+    id: text(product?.id || uid()),
+    name: text(product?.name),
+    price: integer(product?.price),
+    stock: integer(product?.stock,0),
+    unit,
+    icon
+  };
+}
+
+function normalizeDb(data) {
+  if (!data || typeof data !== 'object') throw new Error('File backup tidak valid.');
+  if (!Array.isArray(data.products) || !Array.isArray(data.sales) || !Array.isArray(data.expenses) || !Array.isArray(data.orders)) {
+    throw new Error('Struktur backup tidak dikenali.');
+  }
+  return {
+    products: data.products.map(normalizeProduct),
+    sales: data.sales.filter(x => x && typeof x === 'object'),
+    expenses: data.expenses.filter(x => x && typeof x === 'object'),
+    orders: data.orders.filter(x => x && typeof x === 'object')
+  };
+}
+
 function boot() {
   try {
     const raw = localStorage.getItem(KEY);
-    db = raw ? JSON.parse(raw) : initialData();
-    if (!db || !['products','sales','expenses','orders'].every(k => Array.isArray(db[k]))) {
-      throw new Error('Format data tidak valid');
-    }
+    db = raw ? normalizeDb(JSON.parse(raw)) : initialData();
     localStorage.setItem(KEY, JSON.stringify(db));
   } catch {
     $('main').innerHTML = '<div class="notice">Penyimpanan lokal tidak tersedia atau data aplikasi rusak. Coba browser normal dengan penyimpanan situs aktif. Data lama tidak ditimpa.</div>';
@@ -371,7 +427,13 @@ function render() {
       <td>${esc(p.icon)} ${esc(p.name)}</td>
       <td>${money(p.price)} / ${esc(p.unit)}</td>
       <td class="${p.stock<=5?'low':''}">${p.stock} ${esc(p.unit)}</td>
-      <td><button class="secondary" data-restock="${esc(p.id)}">+ Stok</button></td>
+      <td>
+        <div class="actions">
+          <button class="secondary" data-restock="${esc(p.id)}">+ Stok</button>
+          <button class="secondary" data-edit="${esc(p.id)}">Edit</button>
+          <button class="danger" data-delete="${esc(p.id)}">Hapus</button>
+        </div>
+      </td>
     </tr>`).join('');
   const income = db.sales.reduce((n,s)=>n+s.total,0);
   const expenses = db.expenses.reduce((n,e)=>n+e.amount,0);
@@ -383,11 +445,40 @@ function render() {
     ...db.sales.map(s=>({...s,label:'Penjualan · '+s.items.map(p=>`${p.name} × ${p.qty}`).join('; '),income:s.total,out:0})),
     ...db.expenses.map(e=>({...e,label:e.note,income:0,out:e.amount}))
   ].sort((a,b)=>new Date(b.date)-new Date(a.date));
-  $('#history').innerHTML = history.map(h=>`
+  const historyQuery = $('#history-search').value.toLocaleLowerCase('id-ID').trim();
+  const days = $('#history-period').value === 'all' ? null : Number($('#history-period').value);
+  const now = Date.now();
+  const filteredHistory = history.filter(item => {
+    const label = String(item.label || '').toLocaleLowerCase('id-ID');
+    if (historyQuery && !label.includes(historyQuery)) return false;
+    if (!Number.isFinite(days)) return true;
+    const age = now - new Date(item.date).getTime();
+    return age >= 0 && age <= days * 24 * 60 * 60 * 1000;
+  });
+  $('#history').innerHTML = filteredHistory.map(h=>`
     <tr><td>${esc(new Date(h.date).toLocaleString('id-ID'))}</td>
     <td>${esc(h.label)}</td><td>${h.income?money(h.income):'—'}</td>
     <td>${h.out?money(h.out):'—'}</td></tr>`).join('') ||
     '<tr><td colspan="4" class="empty">Belum ada transaksi.</td></tr>';
+  const monthly = new Map();
+  [...db.sales, ...db.expenses].forEach(item => {
+    const date = new Date(item.date);
+    if (Number.isNaN(date.getTime())) return;
+    const key = date.toISOString().slice(0,7);
+    if (!monthly.has(key)) monthly.set(key,{income:0,out:0});
+    const row = monthly.get(key);
+    if (Object.prototype.hasOwnProperty.call(item,'total')) row.income += Number(item.total) || 0;
+    if (Object.prototype.hasOwnProperty.call(item,'amount')) row.out += Number(item.amount) || 0;
+  });
+  const trend = [...monthly.entries()].sort((a,b)=>a[0].localeCompare(b[0])).slice(-6);
+  $('#trend-list').innerHTML = trend.map(([month,row])=>`
+    <div class="trend-row">
+      <strong>${esc(new Date(month + '-01T00:00:00.000Z').toLocaleDateString('id-ID',{month:'short',year:'numeric'}))}</strong>
+      <span>Masuk: ${money(row.income)}</span>
+      <span>Keluar: ${money(row.out)}</span>
+      <span>Bersih: ${money(row.income-row.out)}</span>
+    </div>
+  `).join('') || '<p class="empty">Belum cukup data untuk menampilkan tren bulanan.</p>';
   $('#merchants').innerHTML = merchants.map(m=>`
     <article class="merchant">
       <span class="pill">Pedagang contoh</span>
@@ -411,6 +502,58 @@ function openEditor(title,fields,action) {
   $('#editor-fields').innerHTML = fields;
   editAction = action;
   $('#editor').showModal();
+}
+function editProduct(id) {
+  const p = db.products.find(x => x.id === id);
+  if (!p) return;
+  openEditor('Edit produk · ' + p.name,`
+    <label>Nama produk<input name="name" maxlength="70" required value="${esc(p.name)}"></label>
+    ${numberField('Harga jual per satuan (Rp)','price',1,p.price)}
+    ${numberField('Stok','stock',0,p.stock)}
+    <label>Satuan<select name="unit">${units.map(unit => `<option ${unit===p.unit?'selected':''}>${unit}</option>`).join('')}</select></label>
+    <label>Ikon produk<input name="icon" maxlength="6" value="${esc(p.icon)}"></label>`,
+  form=>{
+    const nextProduct = normalizeProduct({
+      ...p,
+      name: form.get('name'),
+      price: form.get('price'),
+      stock: form.get('stock'),
+      unit: form.get('unit'),
+      icon: form.get('icon')
+    });
+    return commit(next => {
+      const target = next.products.find(x => x.id === id);
+      Object.assign(target,nextProduct);
+    });
+  });
+}
+
+function removeProduct(id) {
+  const p = db.products.find(x => x.id === id);
+  if (!p) return;
+  if (!confirm(`Hapus produk "${p.name}" dari katalog?`)) return;
+  if (!commit(next => {
+    next.products = next.products.filter(x => x.id !== id);
+  })) return;
+  delete cart[id];
+  render();
+  toast('Produk dihapus dari katalog.');
+}
+
+async function restoreBackup(file) {
+  if (!file) return;
+  try {
+    const raw = await file.text();
+    const parsed = JSON.parse(raw);
+    const restored = normalizeDb(parsed);
+    if (!commit(next => Object.assign(next, restored))) return;
+    cart = {};
+    $('#cash').value = '';
+    render();
+    toast('Backup berhasil dipulihkan.');
+  } catch (error) {
+    toast('Gagal memulihkan backup: ' + error.message);
+  }
 }
 function numberField(label,name,min=1,value='') {
   return `<label>${esc(label)}<input name="${name}" type="number" min="${min}" max="1000000000" step="1" value="${value}" inputmode="numeric" required></label>`;
@@ -483,6 +626,8 @@ function bindEvents() {
     });
   });
   $('#search').addEventListener('input',renderProducts);
+  $('#history-search').addEventListener('input',render);
+  $('#history-period').addEventListener('change',render);
   $('#clear-cart').onclick=()=>{cart={};renderCart();renderProducts();};
   $('#checkout').onclick=checkout;
   $('#cancel-editor').onclick=()=>$('#editor').close();
@@ -516,6 +661,8 @@ function bindEvents() {
           });
         });
     }
+    if (b.dataset.edit) editProduct(b.dataset.edit);
+    if (b.dataset.delete) removeProduct(b.dataset.delete);
     if (b.dataset.order) createOrder(b.dataset.order);
     if (b.dataset.locate) {
       const m=merchants.find(x=>x.id===b.dataset.locate);
@@ -529,10 +676,10 @@ function bindEvents() {
     <label>Nama produk<input name="name" maxlength="70" required placeholder="Contoh: Gula pasir"></label>
     ${numberField('Harga jual per satuan (Rp)','price')}
     ${numberField('Stok awal','stock',0,0)}
-    <label>Satuan<select name="unit"><option>kg</option><option>liter</option><option>pcs</option><option>ikat</option><option>bungkus</option></select></label>`,
+  <label>Satuan<select name="unit">${units.map(unit => `<option>${unit}</option>`).join('')}</select></label>`,
     form=>{
-      const product={id:uid(),name:text(form.get('name')),price:integer(form.get('price')),
-        stock:integer(form.get('stock'),0),unit:text(form.get('unit')),icon:'📦'};
+    const product=normalizeProduct({id:uid(),name:form.get('name'),price:form.get('price'),
+      stock:form.get('stock'),unit:form.get('unit'),icon:'📦'});
       return commit(next=>next.products.push(product));
     });
   $('#add-expense').onclick=()=>openEditor('Catat pengeluaran',`
@@ -550,7 +697,27 @@ function bindEvents() {
     a.href=url; a.download='pasarkita-backup-'+new Date().toISOString().slice(0,10)+'.json';
     a.click();
     setTimeout(()=>URL.revokeObjectURL(url),1000);
-    toast('Backup diunduh. Pemulihan otomatis belum tersedia.');
+    toast('Backup diunduh. Gunakan tombol "Pulihkan backup" untuk memuat kembali data.');
+  };
+  $('#restore-trigger').onclick=()=>$('#restore-file').click();
+  $('#restore-file').onchange=event=>{
+    const [file] = event.target.files || [];
+    restoreBackup(file);
+    event.target.value = '';
+  };
+  $('#reset-data').onclick=()=>{
+    if (!confirm('Reset semua data lokal? Tindakan ini tidak bisa dibatalkan.')) return;
+    if (!commit(next=>{
+      const fresh = initialData();
+      next.products = fresh.products;
+      next.sales = [];
+      next.expenses = [];
+      next.orders = [];
+    })) return;
+    cart = {};
+    $('#cash').value = '';
+    render();
+    toast('Data lokal berhasil direset.');
   };
   window.addEventListener('online',()=>{
     updateConnection();
