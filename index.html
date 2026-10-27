@@ -1230,9 +1230,11 @@ function openEditor(title, fields, action) {
 }
 
 function editProduct(id) {
-  if (!requireRole('admin', 'Hanya Admin yang dapat mengubah produk.')) return;
+  if (!requireRole(['admin', 'penjual'], 'Hanya Admin atau Penjual yang dapat mengubah produk.')) return;
   const p = db.products.find(x => x.id === id);
   if (!p) return;
+  const shop = db.shops.find(item => item.id === p.shopId);
+  if (isPenjual() && shop?.ownerId !== currentUser?.id) return toast('Anda hanya dapat mengubah produk toko sendiri.');
   openEditor('Edit produk · ' + p.name, `
     <label>Nama produk<input name="name" maxlength="70" required value="${esc(p.name)}"></label>
     ${numberField('Harga jual per satuan (Rp)', 'price', 1, p.price)}
