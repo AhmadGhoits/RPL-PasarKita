@@ -220,6 +220,7 @@
       <button data-page="stok">▤ Toko & Stok</button>
       <button data-page="riwayat" hidden>🧾 Riwayat Pembelian</button>
       <button data-page="pasar">⌖ Toko</button>
+      <button data-page="rekapan" hidden>▥ Rekapan Penjualan</button>
       <button data-page="keuangan">↗ Keuangan</button>
     </nav>
     <div class="aside-note">
@@ -298,6 +299,22 @@
         <h2>Pesanan perangkat ini</h2>
         <p class="muted">Pesanan tersimpan lokal dan mengurangi stok toko setelah checkout.</p>
         <div id="orders"></div>
+      </div>
+    </section>
+    <section id="page-rekapan" hidden>
+      <div class="page-head">
+        <div><p class="eyebrow">LAPORAN TOKO</p><h1>Rekapan penjualan</h1><p class="muted">Ringkasan penjualan dari toko yang Anda miliki.</p></div>
+      </div>
+      <div class="stats" id="seller-sales-stats"></div>
+      <div class="panel">
+        <h2>Riwayat penjualan</h2>
+        <p class="muted">Hanya transaksi produk dari toko milik Anda yang ditampilkan.</p>
+        <div class="table-wrap" style="margin-top:16px">
+          <table>
+            <thead><tr><th>Waktu</th><th>Toko</th><th>Rincian</th><th>Total</th></tr></thead>
+            <tbody id="seller-sales-history"></tbody>
+          </table>
+        </div>
       </div>
     </section>
 
@@ -521,7 +538,7 @@ function syncCurrentUser() {
 
 function canAccessPage(role, page) {
   if (role === 'admin') return ['kasir', 'stok', 'pasar', 'keuangan'].includes(page);
-  if (role === 'penjual') return ['kasir', 'stok', 'pasar'].includes(page);
+  if (role === 'penjual') return ['kasir', 'stok', 'pasar', 'rekapan'].includes(page);
   if (role === 'pembeli') return ['kasir', 'riwayat', 'pasar'].includes(page);
   return false;
 }
@@ -834,6 +851,7 @@ function renderNavigation() {
   const btnKasir = document.querySelector('[data-page="kasir"]');
   const btnStok = document.querySelector('[data-page="stok"]');
   const btnKeuangan = document.querySelector('[data-page="keuangan"]');
+  const btnRekapan = document.querySelector('[data-page="rekapan"]');
   const btnRiwayat = document.querySelector('[data-page="riwayat"]');
   if (!currentUser) return;
 
@@ -841,16 +859,19 @@ function renderNavigation() {
     btnKasir.textContent = '▦ Dashboard / Kasir';
     btnStok.hidden = false;
     btnKeuangan.hidden = false;
+    btnRekapan.hidden = true;
     btnRiwayat.hidden = true;
   } else if (isPenjual()) {
     btnKasir.textContent = '🏪 Toko saya';
     btnStok.hidden = false;
     btnKeuangan.hidden = true;
+    btnRekapan.hidden = false;
     btnRiwayat.hidden = true;
   } else {
     btnKasir.textContent = '🏠 Katalog toko';
     btnStok.hidden = true;
     btnKeuangan.hidden = true;
+    btnRekapan.hidden = true;
     btnRiwayat.hidden = false;
   }
 }
@@ -981,6 +1002,42 @@ function renderConsumerHistoryPage() {
   `).join('') || '<tr><td colspan="5" class="empty">Belum ada riwayat pembelian.</td></tr>';
 }
 
+function renderSellerSalesRecap() {
+  if (!isPenjual()) {
+    $('#seller-sales-stats').innerHTML = '';
+    $('#seller-sales-history').innerHTML = '';
+    return;
+  }
+  const shopIds = new Set(db.shops.filter(shop => shop.ownerId === currentUser.id).map(shop => shop.id));
+  const sales = db.sales
+    .map(sale => {
+      const items = (sale.items || []).filter(item => shopIds.has(item.shopId));
+      if (!items.length) return null;
+      return {
+        ...sale,
+        items,
+        total: items.reduce((sum, item) => sum + item.price * item.qty, 0)
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => new Date(b.date) - new Date(a.date));
+  const totalUnits = sales.reduce((sum, sale) => sum + sale.items.reduce((n, item) => n + item.qty, 0), 0);
+  const totalRevenue = sales.reduce((sum, sale) => sum + sale.total, 0);
+  $('#seller-sales-stats').innerHTML =
+    stat('Total penjualan', money(totalRevenue), 'Semua periode') +
+    stat('Jumlah transaksi', `${sales.length} transaksi`, 'Toko Anda') +
+    stat('Produk terjual', `${totalUnits} unit`, 'Semua produk');
+  $('#seller-sales-history').innerHTML = sales.map(sale => {
+    const shopName = db.shops.find(shop => shop.id === sale.items[0].shopId)?.name || 'Toko';
+    return `<tr>
+      <td>${esc(new Date(sale.date).toLocaleString('id-ID'))}</td>
+      <td>${esc(shopName)}</td>
+      <td>${esc(sale.items.map(item => `${item.name} × ${item.qty}`).join('; '))}</td>
+      <td>${money(sale.total)}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="4" class="empty">Belum ada penjualan dari toko Anda.</td></tr>';
+}
+
 function renderFinance() {
   const income = db.sales.reduce((n, s) => n + s.total, 0);
   const expenses = db.expenses.reduce((n, e) => n + e.amount, 0);
@@ -1098,6 +1155,7 @@ function render() {
   renderStockTable();
   renderSalesOrOrders();
   renderConsumerHistoryPage();
+  renderSellerSalesRecap();
   renderMerchants();
   renderFinance();
   if (!canAccessPage(currentUser.role, activePage)) activePage = isAdmin() ? 'kasir' : 'kasir';

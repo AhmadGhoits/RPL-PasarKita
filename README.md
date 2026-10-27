@@ -20,6 +20,7 @@ Jalankan `index.html` memakai Live Server (`http://127.0.0.1:*` atau `http://loc
 
 - **Autentikasi lokal (prototype)**: Login, Sign Up, Logout, sesi aktif per browser, role **Admin**, **Penjual**, dan **Pembeli**, plus akun demo.
 - **Manajemen toko**: penjual dapat membuat/mengubah toko miliknya, menambahkan produk, dan mengubah stok sendiri. Admin dapat mengelola semua toko, produk, dan stok.
+- **Rekapan penjualan Penjual**: penjual dapat melihat total omzet, jumlah transaksi, unit terjual, dan rincian transaksi dari toko miliknya.
 - **Belanja berbasis toko**: pembeli memilih toko, memilih produk dari toko tersebut, checkout, lalu melihat lokasi dan tautan direksi.
 - **Peta toko**: admin dapat melihat semua lokasi toko; peta juga tersedia bagi pembeli dan penjual.
 - **Tema**: tombol mode terang/gelap dengan preferensi tersimpan di browser.
