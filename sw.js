@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE_NAME = 'pasarkita-static-v1';
+const CACHE_NAME = 'pasarkita-static-v2';
 const ASSETS = ['./', './index.html', './README.md', './sw.js'];
 
 self.addEventListener('install', event => {

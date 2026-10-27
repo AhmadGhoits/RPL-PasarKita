@@ -8,7 +8,11 @@
   <style>
     :root {
       --green:#176b48; --dark:#163b2b; --lime:#ddf5b2;
-      --bg:#f5f7f3; --line:#e3e9e0; --muted:#6d796f;
+      --bg:#f5f7f3; --line:#e3e9e0; --muted:#6d796f; --surface:#fff; --soft:#edf3e9;
+    }
+    :root[data-theme="dark"] {
+      --green:#78d5a5; --dark:#e9f5ed; --lime:#173b2b;
+      --bg:#101814; --line:#2a3a31; --muted:#a9b9ae; --surface:#18231d; --soft:#22332a;
     }
     * { box-sizing:border-box }
     body { margin:0; font:15px/1.5 system-ui,sans-serif; background:var(--bg); color:var(--dark) }
@@ -19,15 +23,15 @@
       outline:3px solid #a0c875; outline-offset:3px
     }
     button { border:0; border-radius:12px; padding:10px 16px; background:var(--green); color:white; font-weight:650 }
-    .secondary { background:#edf3e9; color:var(--green) }
-    .danger { color:#a53535; background:#fff0ef }
+    .secondary { background:var(--soft); color:var(--green) }
+    .danger { color:#d98282; background:#402526 }
     .plain { background:transparent; color:var(--muted) }
     h1,h2,h3,p { margin:0 }
     h1 { font-size:30px; letter-spacing:-1px }
     h2 { font-size:21px; letter-spacing:-.5px }
     h3 { font-size:16px }
     small,.muted { color:var(--muted) }
-    header { background:white; border-bottom:1px solid var(--line) }
+    header { background:var(--surface); border-bottom:1px solid var(--line) }
     .topbar { max-width:1260px; margin:auto; padding:18px 28px; display:flex; align-items:center; justify-content:space-between; gap:12px }
     .topbar-right { display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:flex-end }
     .brand { display:flex; gap:10px; align-items:center; font-weight:800; font-size:22px; letter-spacing:-.7px }
@@ -47,15 +51,15 @@
     .hero p { color:#d2e6da; max-width:480px; margin-top:8px }
     .hero-art { font-size:65px; background:#ffffff12; border:1px solid #ffffff22; border-radius:24px; padding:12px 22px; transform:rotate(-8deg) }
     .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:22px }
-    .stat,.panel { background:white; border:1px solid var(--line); border-radius:18px; padding:20px }
+    .stat,.panel { background:var(--surface); border:1px solid var(--line); border-radius:18px; padding:20px }
     .stat strong { display:block; margin-top:7px; font-size:23px; letter-spacing:-.7px }
     .stat small { font-size:12px }
     .split { display:grid; grid-template-columns:minmax(0,1fr) 310px; gap:20px; align-items:start }
     .toolbar { display:flex; align-items:center; gap:10px; margin-bottom:18px }
-    input,select { width:100%; min-height:44px; border:1px solid var(--line); border-radius:11px; padding:11px 13px; background:white; color:var(--dark) }
-    input[type=search] { background:white }
+    input,select { width:100%; min-height:44px; border:1px solid var(--line); border-radius:11px; padding:11px 13px; background:var(--surface); color:var(--dark) }
+    input[type=search] { background:var(--surface) }
     .products { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:13px }
-    .product { background:white; border:1px solid var(--line); padding:13px; border-radius:17px }
+    .product { background:var(--surface); border:1px solid var(--line); padding:13px; border-radius:17px }
     .product-art { height:96px; display:grid; place-items:center; font-size:49px; border-radius:12px; background:#eff4e8; margin-bottom:12px }
     .product:nth-child(3n+2) .product-art { background:#fcf1df }
     .product:nth-child(3n) .product-art { background:#f2ece5 }
@@ -72,7 +76,7 @@
     .empty { color:var(--muted); text-align:center; padding:30px 10px; font-size:14px }
     .table-wrap { overflow:auto }
     table { width:100%; border-collapse:collapse; font-size:14px; text-align:left }
-    th { font-weight:600; color:var(--muted); background:#f7f9f5 }
+    th { font-weight:600; color:var(--muted); background:var(--soft) }
     th,td { padding:13px 12px; border-bottom:1px solid var(--line); white-space:nowrap }
     .actions { display:flex; gap:8px; flex-wrap:wrap }
     .actions button { min-height:34px; padding:6px 10px; border-radius:9px; font-size:13px }
@@ -82,7 +86,7 @@
     .filters { display:grid; grid-template-columns:1fr 180px; gap:10px; margin:14px 0 8px }
     .market-grid { display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:18px }
     #map { height:420px; background:#e6edde; border-radius:16px; z-index:0; display:block }
-    .merchant { background:white; border:1px solid var(--line); border-radius:15px; padding:16px; margin-bottom:12px }
+    .merchant { background:var(--surface); border:1px solid var(--line); border-radius:15px; padding:16px; margin-bottom:12px }
     .merchant button { margin-top:12px; width:100% }
     .section-gap { margin-top:22px }
     .notice { padding:12px 15px; border-radius:12px; background:#fff4db; color:#81601e; font-size:13px; margin-bottom:16px }
@@ -149,6 +153,7 @@
     <div class="topbar-right">
       <span id="identity" class="identity" hidden></span>
       <span id="role-badge" class="badge-role" hidden></span>
+      <button id="theme-toggle" class="secondary" type="button" aria-label="Ubah tema">☾ Mode gelap</button>
       <button id="logout" class="secondary" hidden>Logout</button>
       <span id="connection" class="pill" role="status"></span>
     </div>
@@ -161,7 +166,7 @@
       <div>
         <p class="eyebrow">AKSES PASARKITA</p>
         <h1>Login & Sign Up</h1>
-        <p class="muted">Masuk untuk mengakses fitur sesuai peran Admin atau Konsumer.</p>
+        <p class="muted">Masuk untuk mengakses fitur sesuai peran Admin, Penjual, atau Pembeli.</p>
       </div>
     </div>
     <div class="auth-grid">
@@ -193,7 +198,8 @@
         <label>Role
           <select name="role" required>
             <option value="admin">Admin</option>
-            <option value="konsumer">Konsumer</option>
+            <option value="penjual">Penjual</option>
+            <option value="pembeli">Pembeli</option>
           </select>
         </label>
         <button type="submit" class="full">Daftar</button>
@@ -202,7 +208,7 @@
     </div>
     <div class="security-note">
       Catatan keamanan: autentikasi ini hanya untuk prototipe lokal (browser/localStorage), bukan untuk produksi.
-      <br>Akun demo: Admin <strong>admin@pasarkita.local / Admin123!</strong> · Konsumer <strong>konsumer@pasarkita.local / Konsumer123!</strong>
+      <br>Akun demo: Admin <strong>admin@pasarkita.local / Admin123!</strong> · Penjual <strong>penjual@pasarkita.local / Penjual123!</strong> · Pembeli <strong>pembeli@pasarkita.local / Pembeli123!</strong>
     </div>
   </div>
 </section>
@@ -210,10 +216,10 @@
 <div class="layout" id="app-shell" hidden>
   <aside>
     <nav class="nav" aria-label="Menu utama">
-      <button data-page="kasir" class="active">▦ Kasir</button>
-      <button data-page="stok">▤ Produk & Stok</button>
+      <button data-page="kasir" class="active">▦ Katalog</button>
+      <button data-page="stok">▤ Toko & Stok</button>
       <button data-page="riwayat" hidden>🧾 Riwayat Pembelian</button>
-      <button data-page="pasar">⌖ Titik Titip</button>
+      <button data-page="pasar">⌖ Toko</button>
       <button data-page="keuangan">↗ Keuangan</button>
     </nav>
     <div class="aside-note">
@@ -226,8 +232,8 @@
 <main>
     <section id="page-kasir">
       <div class="page-head">
-        <div><p class="eyebrow">RUANG USAHA ANDA</p><h1>Siap jualan hari ini?</h1><p class="muted">Catat transaksi. Stok langsung terkelola.</p></div>
-        <span class="pill">Toko demo</span>
+        <div><p class="eyebrow">PASAR DIGITAL</p><h1>Belanja dari toko lokal</h1><p class="muted">Pilih toko, pilih produk, lalu checkout dengan petunjuk arah.</p></div>
+        <span class="pill">PasarKita</span>
       </div>
       <div class="hero">
         <div><h2>Dari pasar lokal,<br>untuk kebutuhan sehari-hari.</h2><p>Kasir ringan untuk usaha yang terus bergerak. Mulai dari transaksi pertama Anda.</p></div>
@@ -236,7 +242,7 @@
       <div class="stats" id="sales-stats"></div>
       <div class="split">
         <div>
-          <div class="toolbar"><input id="search" type="search" placeholder="Cari beras, telur, sayuran…" aria-label="Cari produk"></div>
+          <div class="toolbar"><select id="shop-filter" aria-label="Pilih toko"></select><input id="search" type="search" placeholder="Cari produk…" aria-label="Cari produk"></div>
           <div class="products" id="products"></div>
         </div>
         <section class="panel cart" aria-label="Keranjang belanja">
@@ -244,7 +250,7 @@
           <div id="cart-items"></div>
           <div class="divider"></div>
           <div class="between"><span>Total belanja</span><strong id="cart-total"></strong></div>
-          <label>Uang diterima (Rp)<input id="cash" type="number" min="0" step="1" inputmode="numeric" placeholder="Contoh: 50000"></label>
+          <label id="cash-label">Uang diterima (Rp)<input id="cash" type="number" min="0" step="1" inputmode="numeric" placeholder="Contoh: 50000"></label>
           <button class="full" id="checkout">Selesaikan transaksi →</button>
           <p id="checkout-status" class="muted" aria-live="polite" style="font-size:12px;margin-top:10px">Belum ada transaksi pada sesi ini.</p>
           <p class="muted" style="font-size:12px;margin-top:12px">Pembayaran tunai. Tidak memproses pembayaran digital.</p>
@@ -264,10 +270,10 @@
 
 <section id="page-stok" hidden>
       <div class="page-head">
-        <div><p class="eyebrow">KATALOG USAHA</p><h1>Produk & stok</h1><p class="muted">Pastikan barang favorit selalu tersedia.</p></div>
-        <button id="add-product">+ Produk</button>
+        <div><p class="eyebrow">TOKO PENJUAL</p><h1>Toko & stok</h1><p class="muted">Kelola toko dan produk yang menjadi tanggung jawab Anda.</p></div>
+        <div class="actions"><button id="add-shop">+ Toko</button><button id="add-product" class="secondary">+ Produk</button></div>
       </div>
-      <div class="notice">Stok ≤ 5 ditandai menipis. Penambahan stok tidak otomatis mencatat biaya pembelian.</div>
+      <div class="notice">Penjual hanya dapat mengubah toko dan stok miliknya sendiri. Admin dapat mengelola semua toko.</div>
       <div class="panel table-wrap">
         <table>
           <thead><tr><th>Produk</th><th>Harga jual</th><th>Stok</th><th>Tindakan</th></tr></thead>
@@ -278,19 +284,19 @@
 
 <section id="page-pasar" hidden>
       <div class="page-head">
-        <div><p class="eyebrow">BELANJA DEKAT RUMAH</p><h1>Titik Titip Pasar</h1><p class="muted">Pilih pedagang, pesan kebutuhan, ambil di titik titip.</p></div>
+        <div><p class="eyebrow">TOKO TERDAFTAR</p><h1>Lokasi toko</h1><p class="muted">Admin dapat memantau semua toko; pembeli dapat memilih toko sebelum berbelanja.</p></div>
       </div>
-      <div class="notice">Simulasi: nama, harga, koordinat pedagang, dan titik pengambilan adalah data contoh di area Yogyakarta. Bukan informasi toko nyata.</div>
+      <div class="notice">Lokasi dan rute menggunakan OpenStreetMap. Pastikan koordinat toko benar saat membuat toko.</div>
       <div class="market-grid">
         <div>
-          <div id="map" aria-label="Peta lokasi pedagang contoh"></div>
+          <div id="map" aria-label="Peta lokasi toko"></div>
           <p id="map-status" class="muted" style="font-size:12px;margin-top:9px">Memuat peta saat menu dibuka.</p>
         </div>
         <div id="merchants"></div>
       </div>
       <div class="panel section-gap">
-        <h2>Draft pemesanan perangkat ini</h2>
-        <p class="muted">Belum dikirim, belum dikonfirmasi, dan tidak mengurangi stok pedagang.</p>
+        <h2>Pesanan perangkat ini</h2>
+        <p class="muted">Pesanan tersimpan lokal dan mengurangi stok toko setelah checkout.</p>
         <div id="orders"></div>
       </div>
     </section>
@@ -382,42 +388,26 @@ const uid = () => crypto.randomUUID
   ? crypto.randomUUID()
   : Date.now().toString(36) + Math.random().toString(36).slice(2);
 const units = ['kg', 'liter', 'pcs', 'ikat', 'bungkus'];
-const roles = ['admin', 'konsumer'];
+const roles = ['admin', 'penjual', 'pembeli'];
 
 const DEMO_ACCOUNTS = [
   { name: 'Admin Demo', login: 'admin@pasarkita.local', role: 'admin', password: 'Admin123!' },
-  { name: 'Konsumer Demo', login: 'konsumer@pasarkita.local', role: 'konsumer', password: 'Konsumer123!' }
+  { name: 'Penjual Demo', login: 'penjual@pasarkita.local', role: 'penjual', password: 'Penjual123!' },
+  { name: 'Pembeli Demo', login: 'pembeli@pasarkita.local', role: 'pembeli', password: 'Pembeli123!' }
 ];
 
 const initialData = () => ({
   products: [
-    { id: 'p1', name: 'Beras premium', price: 15000, stock: 24, unit: 'kg', icon: '🌾' },
-    { id: 'p2', name: 'Telur ayam', price: 28000, stock: 12, unit: 'kg', icon: '🥚' },
-    { id: 'p3', name: 'Tomat segar', price: 12000, stock: 8, unit: 'kg', icon: '🍅' },
-    { id: 'p4', name: 'Minyak goreng', price: 18000, stock: 16, unit: 'liter', icon: '🫙' },
-    { id: 'p5', name: 'Bayam hijau', price: 4000, stock: 5, unit: 'ikat', icon: '🥬' },
-    { id: 'p6', name: 'Cabai merah', price: 45000, stock: 4, unit: 'kg', icon: '🌶️' }
+    { id: 'p1', shopId: 'shop-demo', name: 'Beras premium', price: 15000, stock: 24, unit: 'kg', icon: '🌾' },
+    { id: 'p2', shopId: 'shop-demo', name: 'Telur ayam', price: 28000, stock: 12, unit: 'kg', icon: '🥚' },
+    { id: 'p3', shopId: 'shop-demo', name: 'Tomat segar', price: 12000, stock: 8, unit: 'kg', icon: '🍅' }
   ],
+  shops: [{
+    id: 'shop-demo', ownerId: null, name: 'PasarKita Demo', description: 'Toko contoh kebutuhan sehari-hari.',
+    lat: -7.798, lng: 110.369, address: 'Yogyakarta', createdAt: new Date().toISOString()
+  }],
   sales: [], expenses: [], orders: [], purchaseOrders: [], users: [], currentSession: null
 });
-
-const merchants = [
-  {
-    id: 'm1', name: 'Lapak Sayur Bu Sari', type: 'Sayuran segar', icon: '🥬',
-    lat: -7.7972, lng: 110.3658, pickup: 'Titik Titip A (contoh)',
-    goods: [{ name: 'Paket sayur harian', price: 15000 }, { name: 'Bayam / ikat', price: 4000 }]
-  },
-  {
-    id: 'm2', name: 'Sembako Pak Budi', type: 'Kebutuhan dapur', icon: '🌾',
-    lat: -7.8008, lng: 110.3692, pickup: 'Titik Titip B (contoh)',
-    goods: [{ name: 'Beras / kg', price: 15000 }, { name: 'Minyak / liter', price: 18000 }]
-  },
-  {
-    id: 'm3', name: 'Telur Mbak Rina', type: 'Telur & bahan pokok', icon: '🥚',
-    lat: -7.7958, lng: 110.3725, pickup: 'Titik Titip C (contoh)',
-    goods: [{ name: 'Telur ayam / kg', price: 28000 }, { name: 'Gula pasir / kg', price: 17000 }]
-  }
-];
 
 let db, cart = {}, editAction;
 let map, mapLoading = false;
@@ -465,7 +455,8 @@ async function verifyPassword(password, storedHash) {
 function normalizeRole(value) {
   const raw = String(value || '').toLowerCase();
   if (raw === 'admin') return 'admin';
-  if (raw === 'konsumer' || raw === 'consumer') return 'konsumer';
+  if (raw === 'penjual' || raw === 'seller') return 'penjual';
+  if (raw === 'pembeli' || raw === 'konsumer' || raw === 'consumer' || raw === 'buyer') return 'pembeli';
   return null;
 }
 
@@ -530,7 +521,8 @@ function syncCurrentUser() {
 
 function canAccessPage(role, page) {
   if (role === 'admin') return ['kasir', 'stok', 'pasar', 'keuangan'].includes(page);
-  if (role === 'konsumer') return ['kasir', 'riwayat', 'pasar'].includes(page);
+  if (role === 'penjual') return ['kasir', 'stok', 'pasar'].includes(page);
+  if (role === 'pembeli') return ['kasir', 'riwayat', 'pasar'].includes(page);
   return false;
 }
 
@@ -538,8 +530,12 @@ function isAdmin() {
   return currentUser?.role === 'admin';
 }
 
-function isKonsumer() {
-  return currentUser?.role === 'konsumer';
+function isPembeli() {
+  return currentUser?.role === 'pembeli';
+}
+
+function isPenjual() {
+  return currentUser?.role === 'penjual';
 }
 
 function requireAuth() {
@@ -578,6 +574,7 @@ function normalizeProduct(product) {
   if (!units.includes(unit)) throw new Error('Satuan produk tidak valid.');
   return {
     id: text(product?.id || uid()),
+    shopId: String(product?.shopId || '').trim() || null,
     name: text(product?.name),
     price: integer(product?.price),
     stock: integer(product?.stock, 0),
@@ -677,6 +674,11 @@ function normalizePurchaseOrders(data) {
       date: safeDate(order.date),
       consumerId: String(order.consumerId || '').trim() || null,
       buyerName: String(order.buyerName || 'Pembeli').trim() || 'Pembeli',
+      shopId: String(order.shopId || '').trim() || null,
+      shopName: String(order.shopName || 'Toko').trim() || 'Toko',
+      shopAddress: String(order.shopAddress || '').trim(),
+      lat: Number.isFinite(Number(order.lat)) ? Number(order.lat) : null,
+      lng: Number.isFinite(Number(order.lng)) ? Number(order.lng) : null,
       paymentMethod: String(order.paymentMethod || 'Transfer (simulasi)').trim() || 'Transfer (simulasi)',
       status: String(order.status || 'Berhasil (simulasi)').trim() || 'Berhasil (simulasi)',
       items,
@@ -695,6 +697,16 @@ async function normalizeDb(data) {
       return null;
     }
   }).filter(Boolean) : [];
+  const shops = (Array.isArray(data.shops) ? data.shops : base.shops).filter(shop => shop && typeof shop === 'object').map(shop => ({
+    id: text(shop.id || uid()),
+    ownerId: shop.ownerId ? String(shop.ownerId) : null,
+    name: text(shop.name || 'Toko tanpa nama'),
+    description: text(shop.description || 'Toko lokal PasarKita'),
+    address: text(shop.address || 'Lokasi belum diisi'),
+    lat: Number.isFinite(Number(shop.lat)) ? Number(shop.lat) : -7.798,
+    lng: Number.isFinite(Number(shop.lng)) ? Number(shop.lng) : 110.369,
+    createdAt: safeDate(shop.createdAt)
+  }));
 
   const usersRaw = Array.isArray(data.users)
     ? data.users
@@ -708,11 +720,18 @@ async function normalizeDb(data) {
     seen.add(user.loginNorm);
   }
   const users = await ensureDemoUsers(usersUnique);
+  const demoSeller = users.find(user => user.role === 'penjual');
+  if (demoSeller) shops.forEach(shop => { if (!shop.ownerId) shop.ownerId = demoSeller.id; });
 
   const sales = normalizeSales(Array.isArray(data.sales) ? data.sales : []);
   const expenses = normalizeExpenses(Array.isArray(data.expenses) ? data.expenses : []);
   const orders = normalizeMarketOrders(Array.isArray(data.orders) ? data.orders : []);
   const purchaseOrders = normalizePurchaseOrders(Array.isArray(data.purchaseOrders) ? data.purchaseOrders : []);
+  const shopIds = new Set(shops.map(shop => shop.id));
+  const migratedProducts = products.map(product => ({
+    ...product,
+    shopId: shopIds.has(product.shopId) ? product.shopId : (shops[0]?.id || null)
+  }));
 
   const sessionUserId = String(data.currentSession?.userId || '').trim();
   const validSession = users.find(user => user.id === sessionUserId) ? {
@@ -721,7 +740,8 @@ async function normalizeDb(data) {
   } : null;
 
   return {
-    products: products.length ? products : base.products,
+    products: migratedProducts.length ? migratedProducts : base.products,
+    shops,
     sales,
     expenses,
     orders,
@@ -822,8 +842,13 @@ function renderNavigation() {
     btnStok.hidden = false;
     btnKeuangan.hidden = false;
     btnRiwayat.hidden = true;
+  } else if (isPenjual()) {
+    btnKasir.textContent = '🏪 Toko saya';
+    btnStok.hidden = false;
+    btnKeuangan.hidden = true;
+    btnRiwayat.hidden = true;
   } else {
-    btnKasir.textContent = '🏠 Beranda / Katalog';
+    btnKasir.textContent = '🏠 Katalog toko';
     btnStok.hidden = true;
     btnKeuangan.hidden = true;
     btnRiwayat.hidden = false;
@@ -832,7 +857,8 @@ function renderNavigation() {
 
 function renderProducts() {
   const query = $('#search').value.toLocaleLowerCase('id-ID').trim();
-  const products = db.products.filter(p => p.name.toLocaleLowerCase('id-ID').includes(query));
+  const shopId = $('#shop-filter').value;
+  const products = db.products.filter(p => (!shopId || p.shopId === shopId) && p.name.toLocaleLowerCase('id-ID').includes(query));
   $('#products').innerHTML = products.map(p => `
     <article class="product">
       <div class="product-art" aria-hidden="true">${esc(p.icon)}</div>
@@ -866,19 +892,44 @@ function renderCart() {
 }
 
 function renderStockTable() {
-  $('#stock-table').innerHTML = db.products.map(p => `
+  const ownedShopIds = isAdmin() ? new Set(db.shops.map(shop => shop.id)) :
+    new Set(db.shops.filter(shop => shop.ownerId === currentUser?.id).map(shop => shop.id));
+  const products = db.products.filter(p => ownedShopIds.has(p.shopId));
+  $('#stock-table').innerHTML = products.map(p => `
     <tr>
-      <td>${esc(p.icon)} ${esc(p.name)}</td>
+      <td>${esc(p.icon)} ${esc(p.name)}<small class="muted"><br>${esc(db.shops.find(s => s.id === p.shopId)?.name || 'Tanpa toko')}</small></td>
       <td>${money(p.price)} / ${esc(p.unit)}</td>
       <td class="${p.stock <= 5 ? 'low' : ''}">${p.stock} ${esc(p.unit)}</td>
       <td>
         <div class="actions">
           <button class="secondary" data-restock="${esc(p.id)}">+ Stok</button>
           <button class="secondary" data-edit="${esc(p.id)}">Edit</button>
-          <button class="danger" data-delete="${esc(p.id)}">Hapus</button>
+          ${isAdmin() ? `<button class="danger" data-delete="${esc(p.id)}">Hapus</button>` : ''}
         </div>
       </td>
     </tr>`).join('') || '<tr><td colspan="4" class="empty">Belum ada produk. Tambahkan produk baru untuk mulai berjualan.</td></tr>';
+}
+
+function renderShopFilter() {
+  const shops = [...db.shops].sort((a, b) => a.name.localeCompare(b.name));
+  const selected = $('#shop-filter').value;
+  $('#shop-filter').innerHTML = '<option value="">Pilih semua toko</option>' +
+    shops.map(shop => `<option value="${esc(shop.id)}">${esc(shop.name)}</option>`).join('');
+  if (shops.some(shop => shop.id === selected)) $('#shop-filter').value = selected;
+}
+
+function renderShops() {
+  const visible = (isAdmin() || isPembeli()) ? db.shops : db.shops.filter(shop => shop.ownerId === currentUser?.id);
+  $('#merchants').innerHTML = visible.map(shop => `
+    <article class="merchant">
+      <span class="pill">${esc(db.users.find(user => user.id === shop.ownerId)?.name || 'Penjual')}</span>
+      <h3 style="margin-top:9px">🏪 ${esc(shop.name)}</h3>
+      <p class="muted">${esc(shop.description)}</p><small>${esc(shop.address)}</small>
+      <div class="between"><button class="secondary" data-locate="${esc(shop.id)}">Lihat peta</button>
+      ${isPembeli() ? `<button data-select-shop="${esc(shop.id)}">Pilih toko</button>` : ''}
+      ${isAdmin() || shop.ownerId === currentUser?.id ? `<button data-edit-shop="${esc(shop.id)}">Edit toko</button>` : ''}
+      ${isAdmin() ? `<button class="danger" data-delete-shop="${esc(shop.id)}">Hapus</button>` : ''}</div>
+    </article>`).join('') || '<p class="empty">Belum ada toko. Buat toko dari menu Toko & Stok.</p>';
 }
 
 function renderSalesOrOrders() {
@@ -982,26 +1033,13 @@ function renderFinance() {
 }
 
 function renderMerchants() {
-  $('#merchants').innerHTML = merchants.map(m => `
-    <article class="merchant">
-      <span class="pill">Pedagang contoh</span>
-      <h3 style="margin-top:9px">${m.icon} ${esc(m.name)}</h3>
-      <p class="muted">${esc(m.type)}</p><small>${esc(m.pickup)}</small>
-      <div class="between">
-        <button class="secondary" data-locate="${m.id}">Lihat peta</button>
-        <button data-order="${m.id}">Pesan</button>
-      </div>
-    </article>`).join('');
-
-  const orders = isKonsumer()
-    ? db.orders.filter(order => order.consumerId === currentUser.id)
-    : db.orders;
+  renderShops();
+  const orders = isPembeli() ? db.purchaseOrders.filter(order => order.consumerId === currentUser.id) : db.purchaseOrders;
   $('#orders').innerHTML = [...orders].reverse().map(o => `
-    <div class="cart-row">
-      <div class="between"><strong>${esc(o.merchant)}</strong><span class="pill">Draft lokal</span></div>
-      <p>${esc(o.good)} × ${o.qty} · ${money(o.total)}</p>
-      <small>${esc(o.pickup)} · ${esc(new Date(o.date).toLocaleString('id-ID'))}</small>
-    </div>`).join('') || '<p class="empty">Belum ada draft pemesanan.</p>';
+    <div class="cart-row"><div class="between"><strong>${esc(o.shopName || 'Toko')}</strong><span class="pill">${esc(o.status)}</span></div>
+    <p>${esc(o.items.map(item => `${item.name} × ${item.qty}`).join('; '))} · ${money(o.total)}</p>
+    <small>${esc(o.shopAddress || '')} · <a target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${o.lat},${o.lng}`)}">Buka direksi</a></small></div>
+  `).join('') || '<p class="empty">Belum ada pesanan.</p>';
 }
 
 function renderDashboardHead() {
@@ -1012,10 +1050,14 @@ function renderDashboardHead() {
     title.textContent = 'Siap jualan hari ini?';
     desc.textContent = 'Catat transaksi. Stok langsung terkelola.';
     badge.textContent = 'Mode Admin';
+  } else if (isPenjual()) {
+    title.textContent = 'Kelola toko Anda';
+    desc.textContent = 'Atur produk dan stok toko milik Anda sendiri.';
+    badge.textContent = 'Mode Penjual';
   } else {
     title.textContent = 'Belanja kebutuhan hari ini';
-    desc.textContent = 'Pilih produk, masukkan keranjang, lalu checkout sederhana.';
-    badge.textContent = 'Mode Konsumer';
+    desc.textContent = 'Pilih toko, pilih produk, lalu checkout dengan petunjuk arah.';
+    badge.textContent = 'Mode Pembeli';
   }
 }
 
@@ -1027,12 +1069,19 @@ function renderStats() {
       stat('Penjualan hari ini', money(salesToday.reduce((n, s) => n + s.total, 0)), 'Transaksi tersimpan') +
       stat('Transaksi hari ini', salesToday.length + ' transaksi', 'Kasir & konsumer') +
       stat('Stok menipis', db.products.filter(p => p.stock <= 5).length + ' produk', 'Stok ≤ 5 satuan');
-  } else {
+  } else if (isPembeli()) {
     const mine = db.purchaseOrders.filter(order => order.consumerId === currentUser.id);
     $('#sales-stats').innerHTML =
       stat('Total pembelian saya', money(mine.reduce((n, order) => n + order.total, 0)), 'Semua periode') +
       stat('Jumlah pesanan', mine.length + ' pesanan', 'Akun ini saja') +
       stat('Produk tersedia', db.products.filter(p => p.stock > 0).length + ' produk', 'Bisa dibeli sekarang');
+  } else {
+    const mine = db.shops.filter(shop => shop.ownerId === currentUser.id);
+    const products = db.products.filter(product => mine.some(shop => shop.id === product.shopId));
+    $('#sales-stats').innerHTML =
+      stat('Toko saya', mine.length + ' toko', 'Toko terdaftar') +
+      stat('Produk saya', products.length + ' produk', 'Katalog milik Anda') +
+      stat('Stok menipis', products.filter(p => p.stock <= 5).length + ' produk', 'Stok ≤ 5 satuan');
   }
 }
 
@@ -1043,6 +1092,7 @@ function render() {
   renderNavigation();
   renderDashboardHead();
   renderStats();
+  renderShopFilter();
   renderProducts();
   renderCart();
   renderStockTable();
@@ -1052,6 +1102,17 @@ function render() {
   renderFinance();
   if (!canAccessPage(currentUser.role, activePage)) activePage = isAdmin() ? 'kasir' : 'kasir';
   setPage(activePage);
+  if (activePage === 'pasar' && map) {
+    map.remove();
+    map = null;
+    initMap();
+  }
+}
+
+function applyTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+  localStorage.setItem('pasarkita-theme', theme);
+  $('#theme-toggle').textContent = theme === 'dark' ? '☀ Mode terang' : '☾ Mode gelap';
 }
 
 function openEditor(title, fields, action) {
@@ -1100,6 +1161,41 @@ function removeProduct(id) {
   toast('Produk dihapus dari katalog.');
 }
 
+function editShop(id) {
+  const shop = db.shops.find(item => item.id === id);
+  if (!shop || (!isAdmin() && shop.ownerId !== currentUser?.id)) return;
+  openEditor('Edit toko · ' + shop.name, `
+    <label>Nama toko<input name="name" maxlength="80" required value="${esc(shop.name)}"></label>
+    <label>Deskripsi toko<textarea name="description" maxlength="240" required style="width:100%;min-height:80px">${esc(shop.description)}</textarea></label>
+    <label>Alamat/lokasi toko<input name="address" maxlength="160" required value="${esc(shop.address)}"></label>
+    ${numberField('Latitude', 'lat', -90, shop.lat)}
+    ${numberField('Longitude', 'lng', -180, shop.lng)}`,
+    form => commit(next => {
+      const target = next.shops.find(item => item.id === id);
+      target.name = text(form.get('name'));
+      target.description = text(form.get('description'));
+      target.address = text(form.get('address'));
+      target.lat = Number(form.get('lat'));
+      target.lng = Number(form.get('lng'));
+      if (!Number.isFinite(target.lat) || target.lat < -90 || target.lat > 90 || !Number.isFinite(target.lng) || target.lng < -180 || target.lng > 180) {
+        throw new Error('Koordinat lokasi tidak valid.');
+      }
+
+      function removeShop(id) {
+        if (!requireRole('admin', 'Hanya Admin yang dapat menghapus toko.')) return;
+        const shop = db.shops.find(item => item.id === id);
+        if (!shop || !confirm(`Hapus toko "${shop.name}" beserta produknya?`)) return;
+        if (!commit(next => {
+          next.shops = next.shops.filter(item => item.id !== id);
+          next.products = next.products.filter(product => product.shopId !== id);
+        })) return;
+        cartLines().filter(line => line.shopId === id).forEach(line => delete cart[line.id]);
+        render();
+        toast('Toko dan produknya dihapus.');
+      }
+    }));
+}
+
 async function restoreBackup(file) {
   if (!requireRole('admin', 'Hanya Admin yang dapat memulihkan backup.')) return;
   if (!file) return;
@@ -1118,7 +1214,9 @@ async function restoreBackup(file) {
 }
 
 function numberField(label, name, min = 1, value = '') {
-  return `<label>${esc(label)}<input name="${name}" type="number" min="${min}" max="1000000000" step="1" value="${value}" inputmode="numeric" required></label>`;
+  const step = min < 0 ? 'any' : '1';
+  const max = min < 0 ? (min === -90 ? 90 : 180) : 1000000000;
+  return `<label>${esc(label)}<input name="${name}" type="number" min="${min}" max="${max}" step="${step}" value="${value}" inputmode="numeric" required></label>`;
 }
 
 function integer(value, min = 1, max = 1000000000) {
@@ -1134,9 +1232,11 @@ function text(value) {
 }
 
 function addQuantity(id) {
-  if (!requireRole(['admin', 'konsumer'], 'Silakan login sebagai Admin atau Konsumer untuk berbelanja.')) return;
+  if (!requireRole(['admin', 'pembeli'], 'Silakan login sebagai Admin atau Pembeli untuk berbelanja.')) return;
   const p = db.products.find(x => x.id === id);
   if (!p) return;
+  const existing = cartLines()[0];
+  if (existing && existing.shopId !== p.shopId) return toast('Checkout hanya dapat berisi produk dari satu toko.');
   if ((cart[id] || 0) >= p.stock) return toast('Stok tidak mencukupi.');
   cart[id] = (cart[id] || 0) + 1;
   renderCart();
@@ -1177,13 +1277,17 @@ function checkoutAdmin() {
   toast('Transaksi tersimpan. Kembalian: ' + money(sale.change));
 }
 
-function checkoutKonsumer() {
-  if (!requireRole('konsumer', 'Checkout konsumer hanya untuk akun Konsumer.')) return;
+function checkoutPembeli() {
+  if (!requireRole('pembeli', 'Checkout hanya untuk akun Pembeli.')) return;
   const lines = cartLines();
   if (!lines.length) return;
   const total = cartTotal();
+  const shop = db.shops.find(item => item.id === lines[0].shopId);
+  const directions = shop ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${shop.lat},${shop.lng}`)}` : '#';
   openEditor('Checkout Pesanan', `
     <p class="muted">Pastikan jumlah produk sudah benar sebelum checkout.</p>
+    <div class="notice"><strong>${esc(shop?.name || 'Toko')}</strong><br>${esc(shop?.address || 'Lokasi toko belum tersedia')}<br>
+      <a target="_blank" rel="noopener" href="${directions}">Buka map & direksi ke toko →</a></div>
     <label>Nama pembeli<input name="buyerName" maxlength="70" required value="${esc(currentUser.name)}"></label>
     <label>Metode pembayaran
       <select name="paymentMethod" required>
@@ -1205,6 +1309,11 @@ function checkoutKonsumer() {
         orderNo,
         date: new Date().toISOString(),
         consumerId: currentUser.id,
+        shopId: latestLines[0].shopId,
+        shopName: db.shops.find(shop => shop.id === latestLines[0].shopId)?.name || 'Toko',
+        shopAddress: db.shops.find(shop => shop.id === latestLines[0].shopId)?.address || '',
+        lat: db.shops.find(shop => shop.id === latestLines[0].shopId)?.lat,
+        lng: db.shops.find(shop => shop.id === latestLines[0].shopId)?.lng,
         buyerName,
         paymentMethod,
         status: 'Berhasil (simulasi)',
@@ -1238,30 +1347,6 @@ function checkoutKonsumer() {
       return true;
     }
   );
-}
-
-function createOrder(id) {
-  if (!requireRole(['admin', 'konsumer'], 'Silakan login untuk membuat draft pesanan.')) return;
-  const m = merchants.find(x => x.id === id);
-  openEditor('Pesan · ' + m.name, `
-    <p class="muted">Draft disimpan di perangkat, tidak dikirim ke pedagang.</p>
-    <label>Barang<select name="good">${m.goods.map((g, i) => `<option value="${i}">${esc(g.name)} — ${money(g.price)}</option>`).join('')}</select></label>
-    ${numberField('Jumlah satuan', 'qty', 1, 1)}
-    <label>Titik pengambilan<input value="${esc(m.pickup)}" readonly></label>`,
-  form => {
-    const good = m.goods[integer(form.get('good'), 0, m.goods.length - 1)];
-    const qty = integer(form.get('qty'), 1, 999);
-    return commit(next => next.orders.push({
-      id: uid(),
-      date: new Date().toISOString(),
-      merchant: m.name,
-      good: good.name,
-      qty,
-      total: good.price * qty,
-      pickup: m.pickup,
-      consumerId: currentUser.id
-    }));
-  });
 }
 
 async function handleSignup(event) {
@@ -1351,17 +1436,18 @@ function bindEvents() {
   $('#logout').addEventListener('click', handleLogout);
 
   $('#search').addEventListener('input', renderProducts);
+  $('#shop-filter').addEventListener('change', () => { cart = {}; renderCart(); renderProducts(); });
   $('#history-search').addEventListener('input', render);
   $('#history-period').addEventListener('change', render);
   $('#clear-cart').onclick = () => {
-    if (!requireRole(['admin', 'konsumer'])) return;
+    if (!requireRole(['admin', 'pembeli'])) return;
     cart = {};
     renderCart();
     renderProducts();
   };
   $('#checkout').onclick = () => {
     if (isAdmin()) checkoutAdmin();
-    else checkoutKonsumer();
+    else if (isPembeli()) checkoutPembeli();
   };
   $('#cancel-editor').onclick = () => $('#editor').close();
   $('#editor-form').onsubmit = async event => {
@@ -1382,7 +1468,7 @@ function bindEvents() {
     if (!b) return;
     if (b.dataset.add) addQuantity(b.dataset.add);
     if (b.dataset.minus) {
-      if (!requireRole(['admin', 'konsumer'])) return;
+      if (!requireRole(['admin', 'pembeli'])) return;
       const id = b.dataset.minus;
       cart[id] = (cart[id] || 0) - 1;
       if (cart[id] <= 0) delete cart[id];
@@ -1390,9 +1476,11 @@ function bindEvents() {
       renderProducts();
     }
     if (b.dataset.restock) {
-      if (!requireRole('admin', 'Hanya Admin yang dapat menambah stok.')) return;
       const id = b.dataset.restock;
       const p = db.products.find(x => x.id === id);
+      const shop = db.shops.find(item => item.id === p?.shopId);
+      if (!requireRole(['admin', 'penjual'], 'Hanya Admin atau Penjual yang dapat menambah stok.') ||
+        (isPenjual() && shop?.ownerId !== currentUser.id)) return toast('Anda hanya dapat mengubah stok toko sendiri.');
       openEditor('Tambah stok · ' + p.name, numberField('Jumlah tambahan (' + p.unit + ')', 'qty'),
         form => {
           const qty = integer(form.get('qty'));
@@ -1404,23 +1492,55 @@ function bindEvents() {
     }
     if (b.dataset.edit) editProduct(b.dataset.edit);
     if (b.dataset.delete) removeProduct(b.dataset.delete);
-    if (b.dataset.order) createOrder(b.dataset.order);
+    if (b.dataset.editShop) editShop(b.dataset.editShop);
+    if (b.dataset.deleteShop) removeShop(b.dataset.deleteShop);
+    if (b.dataset.selectShop) {
+      $('#shop-filter').value = b.dataset.selectShop;
+      cart = {};
+      renderCart();
+      renderProducts();
+      setPage('kasir');
+    }
     if (b.dataset.locate) {
-      const m = merchants.find(x => x.id === b.dataset.locate);
+      const m = db.shops.find(x => x.id === b.dataset.locate);
       if (!map) return toast('Peta belum tersedia. Daftar pedagang tetap dapat digunakan.');
       map.setView([m.lat, m.lng], 16);
-      markers[m.id].openPopup();
+      markers[m.id]?.openPopup();
       $('#map').scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   });
 
+  $('#add-shop').onclick = () => {
+    if (!requireRole(['admin', 'penjual'], 'Hanya Admin atau Penjual yang dapat membuat toko.')) return;
+    openEditor('Buat toko', `
+      <label>Nama toko<input name="name" maxlength="80" required placeholder="Contoh: Toko Segar"></label>
+      <label>Deskripsi toko<textarea name="description" maxlength="240" required style="width:100%;min-height:80px"></textarea></label>
+      <label>Alamat/lokasi toko<input name="address" maxlength="160" required placeholder="Alamat toko"></label>
+      ${numberField('Latitude', 'lat', -90, -7.798)}
+      ${numberField('Longitude', 'lng', -180, 110.369)}`,
+      form => {
+        const shop = {
+          id: uid(), ownerId: isAdmin() ? (db.users.find(user => user.role === 'penjual')?.id || currentUser.id) : currentUser.id,
+          name: text(form.get('name')), description: text(form.get('description')), address: text(form.get('address')),
+          lat: Number(form.get('lat')), lng: Number(form.get('lng')), createdAt: new Date().toISOString()
+        };
+        if (!Number.isFinite(shop.lat) || shop.lat < -90 || shop.lat > 90 || !Number.isFinite(shop.lng) || shop.lng < -180 || shop.lng > 180) {
+          throw new Error('Koordinat lokasi tidak valid.');
+        }
+        return commit(next => next.shops.push(shop));
+      });
+  };
+
   $('#add-product').onclick = () => {
-    if (!requireRole('admin', 'Hanya Admin yang dapat menambah produk.')) return;
+    if (!requireRole(['admin', 'penjual'], 'Hanya Admin atau Penjual yang dapat menambah produk.')) return;
+    const shops = isAdmin() ? db.shops : db.shops.filter(shop => shop.ownerId === currentUser.id);
+    if (!shops.length) return toast('Buat toko terlebih dahulu.');
     openEditor('Tambah produk', `
     <label>Nama produk<input name="name" maxlength="70" required placeholder="Contoh: Gula pasir"></label>
     ${numberField('Harga jual per satuan (Rp)', 'price')}
     ${numberField('Stok awal', 'stock', 0, 0)}
-    <label>Satuan<select name="unit">${units.map(unit => `<option>${unit}</option>`).join('')}</select></label>`,
+    <label>Satuan<select name="unit">${units.map(unit => `<option>${unit}</option>`).join('')}</select></label>
+    <label>Toko<select name="shopId">${shops.map(shop => `<option value="${esc(shop.id)}">${esc(shop.name)}</option>`).join('')}</select></label>`,
     form => {
       const product = normalizeProduct({
         id: uid(),
@@ -1428,7 +1548,8 @@ function bindEvents() {
         price: form.get('price'),
         stock: form.get('stock'),
         unit: form.get('unit'),
-        icon: '📦'
+        icon: '📦',
+        shopId: form.get('shopId')
       });
       return commit(next => next.products.push(product));
     });
@@ -1501,6 +1622,8 @@ function bindEvents() {
     toast('Data transaksi lokal berhasil direset. Akun tetap tersimpan.');
   };
 
+  $('#theme-toggle').onclick = () => applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+
   window.addEventListener('online', () => {
     updateConnection();
     if (!$('#page-pasar').hidden) initMap();
@@ -1560,15 +1683,21 @@ async function initMap() {
     tiles.on('tileerror', () => {
       $('#map-status').textContent = 'Sebagian peta gagal dimuat. Daftar pedagang tetap dapat digunakan.';
     });
-    merchants.forEach(m => {
+    db.shops.forEach(m => {
       const content = document.createElement('div');
       const title = document.createElement('strong');
-      title.textContent = m.name + ' (contoh)';
+      title.textContent = m.name;
       const info = document.createElement('p');
-      info.textContent = m.pickup;
+      info.textContent = m.address;
       const button = document.createElement('button');
-      button.textContent = 'Buat draft pesanan';
-      button.addEventListener('click', () => createOrder(m.id));
+      button.textContent = 'Pilih toko';
+      button.addEventListener('click', () => {
+        $('#shop-filter').value = m.id;
+        cart = {};
+        renderCart();
+        renderProducts();
+        setPage('kasir');
+      });
       content.append(title, info, button);
       markers[m.id] = L.marker([m.lat, m.lng]).addTo(map).bindPopup(content);
     });
@@ -1596,6 +1725,7 @@ async function boot() {
     }
   }
   syncCurrentUser();
+  applyTheme(localStorage.getItem('pasarkita-theme') === 'dark' ? 'dark' : 'light');
   bindEvents();
   updateConnection();
   render();
