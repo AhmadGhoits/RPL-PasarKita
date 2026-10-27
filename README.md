@@ -18,30 +18,26 @@ Jalankan `index.html` memakai Live Server (`http://127.0.0.1:*` atau `http://loc
 
 ## Fitur utama
 
-- **Autentikasi lokal (prototype)**: Login, Sign Up, Logout, sesi aktif per browser, role **Admin** dan **Konsumer**, plus akun demo.
-- **Kasir/Dashboard**: pencarian produk, keranjang, ubah kuantitas, validasi stok, pembayaran tunai (admin), dan riwayat transaksi.
-- **Produk & Stok (Admin)**: tambah/edit/hapus produk, restock, indikator stok menipis/habis, validasi input angka & teks.
-- **Belanja Konsumer**: katalog, keranjang, checkout sederhana (nama pembeli + metode bayar simulasi), order ID, status, dan riwayat pembelian per akun.
-- **Titik Titip**: daftar pedagang contoh, pemesanan draft lokal, serta fallback saat peta tidak tersedia/offline.
+- **Autentikasi lokal (prototype)**: Login, Sign Up, Logout, sesi aktif per browser, role **Admin**, **Penjual**, dan **Pembeli**, plus akun demo.
+- **Manajemen toko**: penjual dapat membuat/mengubah toko miliknya, menambahkan produk, dan mengubah stok sendiri. Admin dapat mengelola semua toko, produk, dan stok.
+- **Belanja berbasis toko**: pembeli memilih toko, memilih produk dari toko tersebut, checkout, lalu melihat lokasi dan tautan direksi.
+- **Peta toko**: admin dapat melihat semua lokasi toko; peta juga tersedia bagi pembeli dan penjual.
+- **Tema**: tombol mode terang/gelap dengan preferensi tersimpan di browser.
 - **Keuangan (Admin)**: ringkasan pemasukan/pengeluaran/arus kas, catat pengeluaran, filter riwayat, tren 6 bulan.
 - **Data lokal**: backup JSON, restore backup dengan normalisasi aman, reset data transaksi (akun tetap aman).
 - **Offline dasar**: service worker untuk cache halaman statis inti.
 
 ## Hak akses role
 
-- **Admin**
-  - Dapat mengakses Dashboard/Kasir, Produk & Stok, Titik Titip, dan Keuangan.
-  - Dapat tambah/edit/hapus produk, tambah stok, catat pengeluaran, backup/restore/reset data transaksi.
-  - Tetap dapat menggunakan alur belanja/kasir.
-- **Konsumer**
-  - Dapat mengakses Beranda/Katalog, Keranjang, Riwayat Pembelian, dan Titik Titip.
-  - Dapat checkout pembelian, melihat riwayat miliknya sendiri.
-  - Tidak dapat mengakses kontrol admin (tambah/edit/hapus/restock, pengeluaran, backup/restore/reset, area keuangan/produk admin).
+- **Admin** dapat mengelola semua toko dan stok, melihat peta semua toko, memakai kasir, serta mengakses keuangan dan backup.
+- **Penjual** hanya dapat membuat/mengubah toko miliknya, menambahkan produk ke toko sendiri, dan menambah stok produk sendiri.
+- **Pembeli** dapat memilih toko, memilih produk, checkout, melihat lokasi/direksi, dan melihat riwayat pembelian sendiri.
 
 ## Akun demo
 
 - Admin: `admin@pasarkita.local` / `Admin123!`
-- Konsumer: `konsumer@pasarkita.local` / `Konsumer123!`
+- Penjual: `penjual@pasarkita.local` / `Penjual123!`
+- Pembeli: `pembeli@pasarkita.local` / `Pembeli123!`
 
 Anda tetap bisa membuat akun baru dari form **Sign Up**.
 
@@ -49,5 +45,5 @@ Anda tetap bisa membuat akun baru dari form **Sign Up**.
 
 - Semua data disimpan di **localStorage browser** (per perangkat/per browser), tidak sinkron antar perangkat.
 - Sistem autentikasi dan hashing password ini hanya untuk **demo/prototipe lokal** tanpa backend, tidak aman untuk produksi.
-- Draft titik titip bersifat simulasi, tidak mengirim pesanan ke pedagang nyata.
+- Pesanan dan pembayaran masih simulasi lokal; tautan direksi membuka layanan peta eksternal.
 - Ringkasan arus kas bukan laporan laba rugi lengkap.
