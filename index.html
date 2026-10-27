@@ -7,12 +7,16 @@
   <title>PasarKita — UMKM & Pasar Digital</title>
   <style>
     :root {
-      --green:#176b48; --dark:#163b2b; --lime:#ddf5b2;
-      --bg:#f5f7f3; --line:#e3e9e0; --muted:#6d796f; --surface:#fff; --soft:#edf3e9;
+      --green:#176b48; --on-green:#fff; --dark:#163b2b; --lime:#ddf5b2;
+      --bg:#f5f7f3; --line:#e3e9e0; --muted:#5e6b61; --surface:#fff; --soft:#edf3e9;
+      --soft-strong:#e3eedb; --warning-bg:#fff4db; --warning-text:#715518; --art:#eff4e8;
+      --focus:#5f8f2d;
     }
     :root[data-theme="dark"] {
-      --green:#78d5a5; --dark:#e9f5ed; --lime:#173b2b;
-      --bg:#101814; --line:#2a3a31; --muted:#a9b9ae; --surface:#18231d; --soft:#22332a;
+      --green:#8fe0b2; --on-green:#082016; --dark:#f2faf4; --lime:#173b2b;
+      --bg:#0d1410; --line:#3a5143; --muted:#c0cec3; --surface:#18231d; --soft:#263a2e;
+      --soft-strong:#31503d; --warning-bg:#493a1e; --warning-text:#ffe4a3; --art:#294033;
+      --focus:#b9e889;
     }
     * { box-sizing:border-box }
     body { margin:0; font:15px/1.5 system-ui,sans-serif; background:var(--bg); color:var(--dark) }
@@ -20,11 +24,11 @@
     button { cursor:pointer; min-height:44px }
     button:disabled { opacity:.45; cursor:not-allowed }
     button:focus-visible,input:focus-visible,select:focus-visible {
-      outline:3px solid #a0c875; outline-offset:3px
+      outline:3px solid var(--focus); outline-offset:3px
     }
-    button { border:0; border-radius:12px; padding:10px 16px; background:var(--green); color:white; font-weight:650 }
+    button { border:0; border-radius:12px; padding:10px 16px; background:var(--green); color:var(--on-green); font-weight:650 }
     .secondary { background:var(--soft); color:var(--green) }
-    .danger { color:#d98282; background:#402526 }
+    .danger { color:#ffb1b1; background:#402526 }
     .plain { background:transparent; color:var(--muted) }
     h1,h2,h3,p { margin:0 }
     h1 { font-size:30px; letter-spacing:-1px }
@@ -36,19 +40,19 @@
     .topbar-right { display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:flex-end }
     .brand { display:flex; gap:10px; align-items:center; font-weight:800; font-size:22px; letter-spacing:-.7px }
     .logo { background:var(--green); color:var(--lime); width:42px; height:42px; border-radius:14px; display:grid; place-items:center }
-    .pill { display:inline-flex; padding:5px 10px; border-radius:20px; background:#edf5e8; font-size:12px; color:var(--green) }
-    .pill.off { background:#fff2d9; color:#946411 }
+    .pill { display:inline-flex; padding:5px 10px; border-radius:20px; background:var(--soft); font-size:12px; color:var(--green) }
+    .pill.off { background:var(--warning-bg); color:var(--warning-text) }
     .layout { max-width:1260px; margin:auto; display:grid; grid-template-columns:200px minmax(0,1fr); min-height:calc(100vh - 80px) }
     aside { padding:28px 16px; border-right:1px solid var(--line) }
     .nav { display:grid; gap:8px }
     .nav button { text-align:left; background:transparent; color:var(--muted); padding:13px 16px }
-    .nav button.active { color:var(--green); background:#e3eedb }
+    .nav button.active { color:var(--green); background:var(--soft-strong) }
     .aside-note { font-size:12px; margin:36px 16px; color:var(--muted) }
     main { padding:30px; min-width:0 }
     .page-head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:22px }
     .eyebrow { font-size:11px; font-weight:750; letter-spacing:2px; color:var(--green); margin-bottom:7px }
-    .hero { background:var(--green); color:white; border-radius:22px; padding:25px; display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:22px; overflow:hidden }
-    .hero p { color:#d2e6da; max-width:480px; margin-top:8px }
+    .hero { background:var(--green); color:var(--on-green); border-radius:22px; padding:25px; display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:22px; overflow:hidden }
+    .hero p { color:color-mix(in srgb, var(--on-green) 72%, transparent); max-width:480px; margin-top:8px }
     .hero-art { font-size:65px; background:#ffffff12; border:1px solid #ffffff22; border-radius:24px; padding:12px 22px; transform:rotate(-8deg) }
     .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:22px }
     .stat,.panel { background:var(--surface); border:1px solid var(--line); border-radius:18px; padding:20px }
@@ -60,12 +64,12 @@
     input[type=search] { background:var(--surface) }
     .products { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:13px }
     .product { background:var(--surface); border:1px solid var(--line); padding:13px; border-radius:17px }
-    .product-art { height:96px; display:grid; place-items:center; font-size:49px; border-radius:12px; background:#eff4e8; margin-bottom:12px }
-    .product:nth-child(3n+2) .product-art { background:#fcf1df }
-    .product:nth-child(3n) .product-art { background:#f2ece5 }
+    .product-art { height:96px; display:grid; place-items:center; font-size:49px; border-radius:12px; background:var(--art); margin-bottom:12px }
+    .product:nth-child(3n+2) .product-art { background:color-mix(in srgb, var(--warning-bg) 80%, var(--surface)) }
+    .product:nth-child(3n) .product-art { background:color-mix(in srgb, var(--muted) 15%, var(--surface)) }
     .product .price { font-weight:750; margin:8px 0 }
     .product button { width:100%; margin-top:11px; padding:8px }
-    .low { color:#ae6819 }
+    .low { color:var(--warning-text) }
     .cart { position:sticky; top:18px }
     .between { display:flex; align-items:center; justify-content:space-between; gap:10px }
     .divider { border-top:1px solid var(--line); margin:17px 0 }
@@ -89,15 +93,15 @@
     .merchant { background:var(--surface); border:1px solid var(--line); border-radius:15px; padding:16px; margin-bottom:12px }
     .merchant button { margin-top:12px; width:100% }
     .section-gap { margin-top:22px }
-    .notice { padding:12px 15px; border-radius:12px; background:#fff4db; color:#81601e; font-size:13px; margin-bottom:16px }
+    .notice { padding:12px 15px; border-radius:12px; background:var(--warning-bg); color:var(--warning-text); font-size:13px; margin-bottom:16px }
     .auth-wrap { max-width:980px; margin:24px auto; padding:0 20px 20px }
     .auth-grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:16px }
-    .security-note { font-size:13px; color:#81601e; background:#fff4db; border:1px solid #ffe6b8; border-radius:12px; padding:12px 14px; margin-top:14px }
+    .security-note { font-size:13px; color:var(--warning-text); background:var(--warning-bg); border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin-top:14px }
     .identity { font-size:13px; color:var(--muted) }
-    .badge-role { display:inline-flex; align-items:center; border-radius:20px; padding:5px 10px; background:#edf5e8; color:var(--green); font-size:12px; font-weight:700; text-transform:capitalize }
+    .badge-role { display:inline-flex; align-items:center; border-radius:20px; padding:5px 10px; background:var(--soft); color:var(--green); font-size:12px; font-weight:700; text-transform:capitalize }
     .access-card { max-width:600px; margin:40px auto; text-align:center }
     .status { margin-top:8px; color:var(--muted); font-size:12px }
-    dialog { border:0; border-radius:20px; padding:25px; width:min(460px,calc(100% - 28px)); max-height:90vh; color:var(--dark); box-shadow:0 20px 80px #14352530 }
+    dialog { border:0; border-radius:20px; padding:25px; width:min(460px,calc(100% - 28px)); max-height:90vh; color:var(--dark); background:var(--surface); box-shadow:0 20px 80px #14352530 }
     dialog::backdrop { background:#132c2455 }
     label { display:block; margin:15px 0; font-size:13px; font-weight:600 }
     label input,label select { margin-top:6px }
@@ -218,6 +222,7 @@
     <nav class="nav" aria-label="Menu utama">
       <button data-page="kasir" class="active">▦ Katalog</button>
       <button data-page="stok">▤ Toko & Stok</button>
+      <button data-page="rekapan" hidden>▥ Rekapan penjualan</button>
       <button data-page="riwayat" hidden>🧾 Riwayat Pembelian</button>
       <button data-page="pasar">⌖ Toko</button>
       <button data-page="keuangan">↗ Keuangan</button>
@@ -265,6 +270,35 @@
             <tbody id="sales-history"></tbody>
           </table>
         </div>
+      </div>
+    </section>
+
+<section id="page-rekapan" hidden>
+      <div class="page-head">
+        <div><p class="eyebrow">REKAPAN PENJUAL</p><h1>Penjualan toko Anda</h1><p class="muted">Pantau omzet, jumlah transaksi, dan produk terlaris dari toko milik Anda.</p></div>
+      </div>
+      <div class="stats" id="seller-sales-stats"></div>
+      <div class="panel">
+        <div class="between">
+          <div><h2>Riwayat penjualan</h2><p class="muted">Transaksi terbaru dari semua toko yang Anda kelola.</p></div>
+          <select id="seller-sales-period" aria-label="Filter periode rekapan" style="max-width:180px">
+            <option value="all">Semua periode</option>
+            <option value="30">30 hari terakhir</option>
+            <option value="90">90 hari terakhir</option>
+            <option value="365">1 tahun terakhir</option>
+          </select>
+        </div>
+        <div class="table-wrap" style="margin-top:16px">
+          <table>
+            <thead><tr><th>Waktu</th><th>Toko</th><th>Rincian</th><th>Total</th><th>Pembayaran</th></tr></thead>
+            <tbody id="seller-sales-history"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="panel section-gap">
+        <h2>Produk terlaris</h2>
+        <p class="muted">Diurutkan berdasarkan jumlah barang terjual.</p>
+        <div id="seller-top-products" class="trend-list"></div>
       </div>
     </section>
 
@@ -521,7 +555,7 @@ function syncCurrentUser() {
 
 function canAccessPage(role, page) {
   if (role === 'admin') return ['kasir', 'stok', 'pasar', 'keuangan'].includes(page);
-  if (role === 'penjual') return ['kasir', 'stok', 'pasar'].includes(page);
+  if (role === 'penjual') return ['kasir', 'stok', 'rekapan', 'pasar'].includes(page);
   if (role === 'pembeli') return ['kasir', 'riwayat', 'pasar'].includes(page);
   return false;
 }
@@ -608,6 +642,7 @@ function normalizeSales(data) {
       if (!name || qty === 0) return null;
       return {
         id: String(item.id || uid()).trim() || uid(),
+        shopId: item.shopId ? String(item.shopId).trim() : null,
         name,
         price,
         qty,
@@ -833,6 +868,7 @@ function setPage(page, accessMessage) {
 function renderNavigation() {
   const btnKasir = document.querySelector('[data-page="kasir"]');
   const btnStok = document.querySelector('[data-page="stok"]');
+  const btnRekapan = document.querySelector('[data-page="rekapan"]');
   const btnKeuangan = document.querySelector('[data-page="keuangan"]');
   const btnRiwayat = document.querySelector('[data-page="riwayat"]');
   if (!currentUser) return;
@@ -840,16 +876,19 @@ function renderNavigation() {
   if (isAdmin()) {
     btnKasir.textContent = '▦ Dashboard / Kasir';
     btnStok.hidden = false;
+    btnRekapan.hidden = true;
     btnKeuangan.hidden = false;
     btnRiwayat.hidden = true;
   } else if (isPenjual()) {
     btnKasir.textContent = '🏪 Toko saya';
     btnStok.hidden = false;
+    btnRekapan.hidden = false;
     btnKeuangan.hidden = true;
     btnRiwayat.hidden = true;
   } else {
     btnKasir.textContent = '🏠 Katalog toko';
     btnStok.hidden = true;
+    btnRekapan.hidden = true;
     btnKeuangan.hidden = true;
     btnRiwayat.hidden = false;
   }
@@ -981,6 +1020,73 @@ function renderConsumerHistoryPage() {
   `).join('') || '<tr><td colspan="5" class="empty">Belum ada riwayat pembelian.</td></tr>';
 }
 
+function sellerSales() {
+  if (!isPenjual()) return [];
+  const ownedShopIds = new Set(db.shops.filter(shop => shop.ownerId === currentUser.id).map(shop => shop.id));
+  return db.sales.filter(sale => sale.items.some(item => {
+    const shopId = item.shopId || db.products.find(product => product.id === item.id)?.shopId;
+    return ownedShopIds.has(shopId);
+  })).map(sale => ({
+    ...sale,
+    items: sale.items.map(item => ({
+      ...item,
+      shopId: item.shopId || db.products.find(product => product.id === item.id)?.shopId || null
+    }))
+  }));
+}
+
+function renderSellerSales() {
+  if (!isPenjual()) return;
+  const ownedShopIds = new Set(db.shops.filter(shop => shop.ownerId === currentUser.id).map(shop => shop.id));
+  const daysValue = $('#seller-sales-period').value;
+  const days = daysValue === 'all' ? null : Number(daysValue);
+  const now = Date.now();
+  const sales = sellerSales().filter(sale => {
+    if (!Number.isFinite(days)) return true;
+    const age = now - new Date(sale.date).getTime();
+    return age >= 0 && age <= days * 24 * 60 * 60 * 1000;
+  });
+  const revenue = sales.reduce((sum, sale) => sum + sale.items
+    .filter(item => ownedShopIds.has(item.shopId))
+    .reduce((itemSum, item) => itemSum + item.price * item.qty, 0), 0);
+  const unitsSold = sales.reduce((sum, sale) => sum + sale.items
+    .filter(item => ownedShopIds.has(item.shopId))
+    .reduce((itemSum, item) => itemSum + item.qty, 0), 0);
+  $('#seller-sales-stats').innerHTML =
+    stat('Total omzet', money(revenue), daysValue === 'all' ? 'Semua periode' : `${daysValue} hari terakhir`) +
+    stat('Transaksi', sales.length + ' transaksi', 'Toko milik Anda') +
+    stat('Barang terjual', unitsSold + ' unit', 'Jumlah seluruh produk');
+
+  $('#seller-sales-history').innerHTML = sales
+    .sort((a, b) => new Date(b.date) - new Date(a.date))
+    .map(sale => {
+      const items = sale.items.filter(item => ownedShopIds.has(item.shopId));
+      const shopIds = [...new Set(items.map(item => item.shopId))];
+      const shopNames = shopIds.map(id => db.shops.find(shop => shop.id === id)?.name).filter(Boolean).join(', ');
+      const total = items.reduce((sum, item) => sum + item.price * item.qty, 0);
+      return `<tr>
+        <td>${esc(new Date(sale.date).toLocaleString('id-ID'))}</td>
+        <td>${esc(shopNames || 'Toko')}</td>
+        <td>${esc(items.map(item => `${item.name} × ${item.qty}`).join('; '))}</td>
+        <td>${money(total)}</td>
+        <td>${esc(sale.paymentMethod)}</td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="5" class="empty">Belum ada penjualan pada periode ini.</td></tr>';
+
+  const products = new Map();
+  sales.forEach(sale => sale.items.filter(item => ownedShopIds.has(item.shopId)).forEach(item => {
+    const row = products.get(item.id) || { name: item.name, qty: 0, revenue: 0 };
+    row.qty += item.qty;
+    row.revenue += item.price * item.qty;
+    products.set(item.id, row);
+  }));
+  $('#seller-top-products').innerHTML = [...products.values()]
+    .sort((a, b) => b.qty - a.qty || b.revenue - a.revenue)
+    .slice(0, 8)
+    .map(row => `<div class="trend-row"><strong>${esc(row.name)}</strong><span>Terjual: ${row.qty} unit</span><span>Omzet: ${money(row.revenue)}</span></div>`)
+    .join('') || '<p class="empty">Belum ada data produk terjual.</p>';
+}
+
 function renderFinance() {
   const income = db.sales.reduce((n, s) => n + s.total, 0);
   const expenses = db.expenses.reduce((n, e) => n + e.amount, 0);
@@ -1097,6 +1203,7 @@ function render() {
   renderCart();
   renderStockTable();
   renderSalesOrOrders();
+  renderSellerSales();
   renderConsumerHistoryPage();
   renderMerchants();
   renderFinance();
@@ -1439,6 +1546,7 @@ function bindEvents() {
   $('#shop-filter').addEventListener('change', () => { cart = {}; renderCart(); renderProducts(); });
   $('#history-search').addEventListener('input', render);
   $('#history-period').addEventListener('change', render);
+  $('#seller-sales-period').addEventListener('change', renderSellerSales);
   $('#clear-cart').onclick = () => {
     if (!requireRole(['admin', 'pembeli'])) return;
     cart = {};
