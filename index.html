@@ -28,6 +28,7 @@
     }
     button { border:0; border-radius:12px; padding:10px 16px; background:var(--green); color:var(--on-green); font-weight:650 }
     .secondary { background:var(--soft); color:var(--green) }
+    #theme-toggle { min-height:34px; padding:6px 10px; border-radius:9px; font-size:13px }
     .danger { color:#ffb1b1; background:#402526 }
     .plain { background:transparent; color:var(--muted) }
     h1,h2,h3,p { margin:0 }
@@ -206,7 +207,6 @@
         </label>
         <label>Role
           <select name="role" required>
-            <option value="admin">Admin</option>
             <option value="penjual">Penjual</option>
             <option value="pembeli">Pembeli</option>
           </select>
@@ -1632,7 +1632,7 @@ async function handleSignup(event) {
     const password = String(form.get('password') || '');
     const confirmPassword = String(form.get('confirmPassword') || '');
     const role = normalizeRole(form.get('role'));
-    if (!role) throw new Error('Role tidak valid.');
+    if (!['penjual', 'pembeli'].includes(role)) throw new Error('Role signup hanya Penjual atau Pembeli.');
     if (password.length < 8) throw new Error('Password minimal 8 karakter.');
     if (password !== confirmPassword) throw new Error('Konfirmasi password tidak cocok.');
     if (db.users.some(user => user.loginNorm === loginNorm)) throw new Error('Akun dengan email/username tersebut sudah ada.');
